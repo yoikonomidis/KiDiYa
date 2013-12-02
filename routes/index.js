@@ -7,10 +7,6 @@ exports.index = function(req, res){
   res.render('index', { title: 'Express' });
 };
 
-exports.helloworld = function(req, res){
-	res.render('helloworld', {title: 'HelloWorld'});
-};
-
 exports.emplist = function(db){
 	return function(req, res){
 		var collection = db.get('empcollection');
@@ -28,7 +24,6 @@ exports.newemp = function(req,res){
 
 exports.addemp = function(db){
 	return function(req,res){
-		console.log("DEBUG")
 		//Get form values
 		var firstName = req.body.firstname;
 		var lastName  = req.body.lastname;
@@ -91,6 +86,7 @@ exports.rememp = function(db){
 
 exports.androiddata = function(req, res){
 
-	var data = req.body.firstName;
+	var firstname = req.body.firstName;
+	var lastname = req
 	console.log(data);
 }

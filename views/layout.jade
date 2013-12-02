@@ -1,7 +1,15 @@
 doctype 5
 html
-  head
-    title= title
-    link(rel='stylesheet', href='/stylesheets/style.css')
-  body
-    block content
+	head
+		title= title
+		link(rel='stylesheet', href='/stylesheets/style.css')
+	body
+		table
+			tr
+				td
+					a(href="/emplist") List
+				td
+					a(href="/newemp") Add
+				td
+					a(href="/delemp") Delete
+	block content

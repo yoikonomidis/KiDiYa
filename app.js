@@ -37,14 +37,13 @@ if ('development' == app.get('env')) {
 
 app.get('/', routes.index);
 app.get('/users', user.list);
-app.get('/helloworld', routes.helloworld);
 app.get('/emplist', routes.emplist(db));
 app.get('/newemp', routes.newemp);
 app.get('/delemp', routes.delemp);
 
 app.post('/addemp',routes.addemp(db));
 app.post('/rememp',routes.rememp(db));
-app.post('/androiddata',routes.androiddata);
+app.post('/androiddata',routes.androiddata);	//this can route directly to "/addemp"
 //TODO write androiddata to the database
 
 http.createServer(app).listen(app.get('port'), function(){
