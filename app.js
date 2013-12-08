@@ -17,8 +17,8 @@ var db = monk('localhost:27017/nodetest1');
 var app = express();
 
 // all environments
-app.set('port', process.env.PORT || 3000);
-app.set('views', path.join(__dirname, 'views'));
+app.set('port', process.env.PORT || 3000); // Whatever is in the environment variable PORT, or 3000 if there's nothing there
+app.set('views', path.join(__dirname, 'views')); // Join all arguments together and normalize the resulting path
 app.set('view engine', 'jade');
 app.use(express.favicon());
 app.use(express.logger('dev'));
@@ -35,6 +35,7 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
+// Order matters! Nodejs will match the incoming request to the first
 app.get('/', routes.index);
 app.get('/users', user.list);
 app.get('/emplist', routes.emplist(db));

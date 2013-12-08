@@ -25,9 +25,9 @@ exports.newemp = function(req,res){
 exports.addemp = function(db){
 	return function(req,res){
 		//Get form values
-		var firstName = req.body.firstname;
-		var lastName  = req.body.lastname;
-		var managerId = req.body.managerid;
+		var firstName = req.body.firstName;
+		var lastName  = req.body.lastName;
+		var managerId = req.body.managerId;
 
 		//Set collection
 		var collection = db.get('empcollection');
@@ -87,6 +87,6 @@ exports.rememp = function(db){
 exports.androiddata = function(req, res){
 
 	var firstname = req.body.firstName;
-	var lastname = req
-	console.log(data);
+	var lastname = req.body.lastName;
+	console.log(req);
 }
