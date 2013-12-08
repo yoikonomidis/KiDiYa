@@ -5,7 +5,6 @@
 
 var express = require('express');
 var routes = require('./routes');
-var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
 
@@ -37,15 +36,26 @@ if ('development' == app.get('env')) {
 
 // Order matters! Nodejs will match the incoming request to the first
 app.get('/', routes.index);
-app.get('/users', user.list);
 app.get('/emplist', routes.emplist(db));
 app.get('/newemp', routes.newemp);
 app.get('/delemp', routes.delemp);
 
+app.get('/userList', routes.userList(db));
+app.get('/newUser', routes.newUser);
+app.get('/deleteUser', routes.deleteUser);
+app.get('/vehicleList', routes.vehicleList(db));
+app.get('/newVehicle', routes.newVehicle);
+app.get('/deleteVehicle', routes.deleteVehicle);
+
 app.post('/addemp',routes.addemp(db));
 app.post('/rememp',routes.rememp(db));
-app.post('/androiddata',routes.androiddata);	//this can route directly to "/addemp"
 //TODO write androiddata to the database
+app.post('/androiddata',routes.androiddata);	//this can route directly to "/addemp"
+
+app.post('/addUser', routes.addUser(db));
+app.post('/removeUser',routes.removeUser(db));
+app.post('/addVehicle', routes.addVehicle(db));
+app.post('/removeVehicle',routes.removeVehicle(db));
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));

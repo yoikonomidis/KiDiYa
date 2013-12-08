@@ -1,0 +1,7 @@
+extends layout
+
+block content
+	h1= title
+	form#formRemoveVehicle(name="removeVehicle",method="post",action="removeVehicle")
+		input#inputFirstName(type="text", placeholder="firstName",name="firstName")
+		button#btnSubmit(type="submit") submit
