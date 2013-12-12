@@ -1,0 +1,9 @@
+extends layout
+
+block content
+	h1.
+		Vehicle List
+	ul
+		each vehicle, i in vehicleList
+			li
+				a(href="mailto:#{vehicle.email}")= vehicle.vehicle.type

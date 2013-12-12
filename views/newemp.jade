@@ -1,0 +1,9 @@
+extends layout
+
+block content
+	h1= title
+	form#formAddUser(name="addemp",method="post",action="addemp")
+		input#inputFirstName(type="text", placeholder="firstname",name="firstName")
+		input#inputLastName(type="text", placeholder="lastname",name="lastName")
+		input#inputManagerId(type="text", placeholder="managerid",name="managerId")
+		button#btnSubmit(type="submit") submit
