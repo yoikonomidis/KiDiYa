@@ -60,14 +60,16 @@ app.post('/rememp', routes.rememp(db));
 app.post('/androiddata', routes.androiddata);	//this can route directly to "/addemp"
 
 app.post('/addUser', routes.addUser(db));
-app.post('/removeUser',  routes.checkAuthUser(db), routes.removeUser(db));
-app.post('/addVehicle',  routes.checkAuthUser(db), routes.addVehicle(db));
-app.post('/removeVehicle',  routes.checkAuthUser(db), routes.removeVehicle(db));
-app.post('/addVUPair',  routes.checkAuthUser(db), routes.addVUPair(db));
-app.post('/removeVUPair',  routes.checkAuthUser(db), routes.removeVUPair(db));
-
+app.post('/removeUser', routes.removeUser(db));
+app.post('/addVehicle', routes.addVehicle(db));
+app.post('/removeVehicle', routes.removeVehicle(db));
+app.post('/addVUPair', routes.addVUPair(db));
+app.post('/removeVUPair', routes.removeVUPair(db));
+app.post('/updateUserLocation',routes.updateUserLocation(db));
 app.get('/cleanDatabase', routes.cleanDatabase(db));
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
+
+
