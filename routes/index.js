@@ -1,12 +1,4 @@
 
-/*
- * GET home page.
- */
-
-exports.index = function(req, res){
-  res.render('index', { title: 'KiDiYa' });
-};
-
 // ################ Dummy ################
 
 exports.emplist = function(db){
@@ -94,6 +86,57 @@ exports.androiddata = function(req, res){
 }
 
 // ################ KiDiYa ################
+
+// Return Home page
+exports.index = function(req, res){
+  res.render('index', { title: 'KiDiYa' });
+};
+
+// Login procedure of a user
+// If login is successful, redirects to the home page
+exports.userLogin = function(db){
+	return function(req, res, next){
+		var collection = db.get('userCollection');
+  		var user = req.body;
+  		collection.find({"user.name" : user.user.name, "user.password" : user.user.password}, function(err,fetchedUser){
+			if(err){
+				//if it failed, return error
+				res.send("There was a problem retrieving the user from the database.");
+			}
+			else{
+				if(user.user.password == fetchedUser[0].user.password){
+    				req.session.user_id = fetchedUser[0]._id;
+    				// res.redirect('index');
+    				next();
+  				}else{
+    				res.send('Bad user/pass');
+  				}	
+			}
+		});
+  	};
+};
+
+// Logout procedure of a user
+// If successful, redirects to the home page
+exports.userLogout = function(db){
+	return function(req, res, next){
+  		delete req.session.user_id;
+  		// res.redirect('index');
+  		next();
+ 	};
+};
+
+// Checks whether the user has previously authenticated himself in the system
+exports.checkAuthUser = function(db){
+	return function(req, res, next){
+		console.log(req.session.user_id);
+  		if(!req.session.user_id){
+    		res.send('You are not authorized to view this page');
+  		}else{
+    		next();
+  		}
+  	};
+};
 
 // Prints the user list on the browser
 exports.userList = function(db){

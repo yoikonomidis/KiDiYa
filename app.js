@@ -35,21 +35,24 @@ if ('development' == app.get('env')) {
 }
 
 // Order matters! Nodejs will match the incoming request to the first
-app.get('/', routes.index);
+app.post('/userLogin', routes.userLogin(db), routes.index);
+app.get('/userLogout', routes.userLogout(db), routes.index);
+app.get('/', routes.checkAuthUser(db), routes.index);
+
 app.get('/emplist', routes.emplist(db));
 app.get('/newemp', routes.newemp);
 app.get('/delemp', routes.delemp);
 
-app.get('/userList', routes.userList(db));
-app.get('/userListMobile', routes.userListMobile(db));
+app.get('/userList',  routes.checkAuthUser(db), routes.userList(db));
+app.get('/userListMobile',  routes.checkAuthUser(db), routes.userListMobile(db));
 // app.get('/newUser', routes.newUser);
-app.get('/deleteUser', routes.deleteUser);
-app.get('/vehicleList', routes.vehicleList(db));
-app.get('/vehicleListMobile', routes.vehicleListMobile(db));
+app.get('/deleteUser',  routes.checkAuthUser(db), routes.deleteUser);
+app.get('/vehicleList',  routes.checkAuthUser(db), routes.vehicleList(db));
+app.get('/vehicleListMobile',  routes.checkAuthUser(db), routes.vehicleListMobile(db));
 // app.get('/newVehicle', routes.newVehicle);
-app.get('/deleteVehicle', routes.deleteVehicle);
+app.get('/deleteVehicle',  routes.checkAuthUser(db), routes.deleteVehicle);
 
-app.get('/vuPairList', routes.vuPairList(db));
+app.get('/vuPairList',  routes.checkAuthUser(db), routes.vuPairList(db));
 
 app.post('/addemp', routes.addemp(db));
 app.post('/rememp', routes.rememp(db));
@@ -57,11 +60,11 @@ app.post('/rememp', routes.rememp(db));
 app.post('/androiddata', routes.androiddata);	//this can route directly to "/addemp"
 
 app.post('/addUser', routes.addUser(db));
-app.post('/removeUser', routes.removeUser(db));
-app.post('/addVehicle', routes.addVehicle(db));
-app.post('/removeVehicle', routes.removeVehicle(db));
-app.post('/addVUPair', routes.addVUPair(db));
-app.post('/removeVUPair', routes.removeVUPair(db));
+app.post('/removeUser',  routes.checkAuthUser(db), routes.removeUser(db));
+app.post('/addVehicle',  routes.checkAuthUser(db), routes.addVehicle(db));
+app.post('/removeVehicle',  routes.checkAuthUser(db), routes.removeVehicle(db));
+app.post('/addVUPair',  routes.checkAuthUser(db), routes.addVUPair(db));
+app.post('/removeVUPair',  routes.checkAuthUser(db), routes.removeVUPair(db));
 
 app.get('/cleanDatabase', routes.cleanDatabase(db));
 
