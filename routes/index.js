@@ -213,8 +213,9 @@ exports.newVehicle = function(req,res){
 };
 
 // Inserts a user in the user list
+// If successful, login procedure follows, and user is redirected to the home page
 exports.addUser = function(db){
-	return function(req, res){
+	return function(req, res, next){
 		var collection = db.get('userCollection');
   		var user = req.body;
   		collection.insert(user, function(err, userList){
@@ -224,9 +225,10 @@ exports.addUser = function(db){
 			}
 			else{
 				//Forward to success page
-				res.redirect("userList");
+				// res.redirect("userList");
 				//And set the header so the address bar doesn't still say /addUser
-				res.location("userList");
+				// res.location("userList");
+				next();
 			}
 		});
 	}
