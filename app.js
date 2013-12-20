@@ -1,10 +1,18 @@
+/*	################					################
+	################	KiDiYa Project	################
+	################	----2013----	################
+	################					################
+*/
 
 /**
  * Module dependencies.
  */
-
 var express = require('express');
 var routes = require('./routes');
+var user = require('./routes/user.js');
+var vehicle = require('./routes/vehicle.js');
+var vupair = require('./routes/vupair.js');
+var utils = require('./routes/utils.js');
 var http = require('http');
 var path = require('path');
 
@@ -29,42 +37,44 @@ app.use(express.session());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
+var development = false;
+
 // development only
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());
+  development = true;
 }
 
 // Order matters! Nodejs will match the incoming request to the first
-app.get('/', routes.index);
-app.get('/emplist', routes.emplist(db));
-app.get('/newemp', routes.newemp);
-app.get('/delemp', routes.delemp);
+app.post('/userLogin', user.userLogin(db), routes.index);
+app.get('/userLogout', user.userLogout(db), routes.index);
+app.get('/', user.checkAuthUser(db, development), routes.index);
 
-app.get('/userList', routes.userList(db));
-app.get('/userListMobile', routes.userListMobile(db));
+app.get('/userList',  user.checkAuthUser(db, development), user.userList(db));
+app.get('/userListMobile',  user.checkAuthUser(db, development), user.userListMobile(db));
 // app.get('/newUser', routes.newUser);
-app.get('/deleteUser', routes.deleteUser);
-app.get('/vehicleList', routes.vehicleList(db));
-app.get('/vehicleListMobile', routes.vehicleListMobile(db));
+// app.get('/deleteUser',  routes.checkAuthUser(db), routes.deleteUser);
+app.post('/addUser', user.addUser(db));
+app.post('/removeUser', user.removeUser(db));
+
+app.get('/vehicleList',  user.checkAuthUser(db, development), vehicle.vehicleList(db));
+app.get('/vehicleListMobile',  user.checkAuthUser(db, development), vehicle.vehicleListMobile(db));
 // app.get('/newVehicle', routes.newVehicle);
-app.get('/deleteVehicle', routes.deleteVehicle);
+// app.get('/deleteVehicle',  routes.checkAuthUser(db), routes.deleteVehicle);
+app.post('/addVehicle', vehicle.addVehicle(db));
+app.post('/removeVehicle', vehicle.removeVehicle(db));
+app.post('/reserveVehicle', vehicle.reserveVehicle(db), vehicle.vehicleList(db));
 
-app.get('/vuPairList', routes.vuPairList(db));
+app.get('/vuPairList',  user.checkAuthUser(db, development), vupair.vuPairList(db));
+app.get('/vuPairListMobile',  user.checkAuthUser(db, development), vupair.vuPairListMobile(db));
+app.post('/addVUPair', vupair.addVUPair(db));
+app.post('/removeVUPair', vupair.removeVUPair(db));
 
-app.post('/addemp', routes.addemp(db));
-app.post('/rememp', routes.rememp(db));
-//TODO write androiddata to the database
-app.post('/androiddata', routes.androiddata);	//this can route directly to "/addemp"
-
-app.post('/addUser', routes.addUser(db));
-app.post('/removeUser', routes.removeUser(db));
-app.post('/addVehicle', routes.addVehicle(db));
-app.post('/removeVehicle', routes.removeVehicle(db));
-app.post('/addVUPair', routes.addVUPair(db));
-app.post('/removeVUPair', routes.removeVUPair(db));
-
-app.get('/cleanDatabase', routes.cleanDatabase(db));
+app.post('/updateUserLocation',user.updateUserLocation(db));
+app.get('/cleanDatabase', utils.cleanDatabase(db));
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
+
+

@@ -1,0 +1,33 @@
+{
+	"vehicle":
+	{
+		"id":0,
+		"type":"type",
+		"location":
+		{
+			"longtitude":0.1,
+			"langtitude":0.1
+		},
+		"reserved":"reserved",
+		"locked":"locked"
+	},
+	"user":
+	{
+		"id":0,
+		"name":"name",
+		"surname":"surname",
+		"password":"password",
+		"location":
+		{
+			"longtitude":0.1,
+			"langtitude":0.1
+		}
+	},
+	"pair":
+	{
+		"vehicleId":0,
+		"userId":0,
+		"startTime":0,
+		"endTime":0
+	}
+}
