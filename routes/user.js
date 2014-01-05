@@ -73,7 +73,7 @@ exports.userList = function(db){
 exports.userListMobile = function(db){
 	return function(req, res){
 		User.find({}, {}, function(e, userList){
-			console.log(res);
+			// console.log(res);
 			var body = JSON.stringify(userList);
  			res.writeHead(200, {
 				'Content-Length': body.length,
@@ -98,19 +98,12 @@ exports.newVehicle = function(req,res){
 // If successful, login procedure follows, and user is redirected to the home page
 exports.addUser = function(db){
 	return function(req, res, next){
-		// var collection = db.get('userCollection');
-  		// var user = req.body;
-  		// collection.insert(user, function(err, userList){
   		new User(req.body).save( function(err, userList){	
 			if(err){
 				//if it failed, return error
 				res.send("There was a problem adding the information to the database.");
 			}
 			else{
-				//Forward to success page
-				// res.redirect("userList");
-				//And set the header so the address bar doesn't still say /addUser
-				// res.location("userList");
 				next();
 			}
 		});
@@ -138,7 +131,8 @@ exports.removeUser = function(db){
 
 exports.updateUserLocation = function(db){
 	return function(req,res,next){
-		User.find({name:req.body.name}).update({$set:{location:req.body.location}}, function(err, userList){
+		// User.find({id:req.body.id}).update({$set:{location:req.body.location}}, function(err, userList){
+		User.update({id:req.body.id},{$set:{location:req.body.location}}, function(err, userList){	
 			if(err){
 				//if it failed, return error
 				res.send("There was a problem adding the information to the database.");
