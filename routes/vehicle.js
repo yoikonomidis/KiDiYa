@@ -105,7 +105,7 @@ exports.reserveVehicle = function(db){
 
 exports.updateVehicleLocation = function(db){
 	return function(req,res,next){
-		Vehicle.find({name:req.body.name}).update({$set:{location:req.body.location}}, function(err, userList){
+		Vehicle.update({id:req.body.id},{$set:{location:req.body.location}}, function(err, userList){
 			if(err){
 				//if it failed, return error
 				res.send("There was a problem adding the information to the database.");
