@@ -4,11 +4,12 @@
 	################					################
 */
 
+var Vehicle = require('../models/vehicle.js');
+
 // Prints the vehicle list on the browser
 exports.vehicleList = function(db){
 	return function(req, res){
-		var collection = db.get('vehicleCollection');
-		collection.find({}, {}, function(e, vehicleList){
+		Vehicle.find({},{}, function(e, vehicleList){
 			res.render('vehicleList',{
 				"vehicleList": vehicleList
 			});
@@ -32,19 +33,18 @@ exports.newVehicle = function(req,res){
 
 // Inserts a vehicle in the vehicle list
 exports.addVehicle = function(db){
-	return function(req, res){
-		var collection = db.get('vehicleCollection');
-  		var vehicle = req.body;
-  		collection.insert(vehicle, function(err, vehicleList){
+	return function(req, res, next){
+		new Vehicle(req.body).save( function(err, vehicleList){
 			if(err){
 				//if it failed, return error
 				res.send("There was a problem adding the information to the database.");
 			}
 			else{
-				//Forward to success page
-				res.redirect("vehicleList");
-				//And set the header so the address bar doesn't still say /addUser
-				res.location("vehicleList");
+				// //Forward to success page
+				// res.redirect("vehicleList");
+				// //And set the header so the address bar doesn't still say /addUser
+				// res.location("vehicleList");
+				next();
 			}
 		});
 	}
@@ -56,22 +56,14 @@ exports.deleteVehicle = function(req, res){
 
 // Removes a vehicle from the vehicle list
 exports.removeVehicle = function(db){
-	return function(req, res){
-		var collection = db.get('vehicleCollection');
-		var vehicle = req.body;
-
-		//Submit to the DB
-		collection.remove({"vehicle.id" : vehicle.vehicle.id}, function(err, vehicleList){
+	return function(req,res, next){
+		Vehicle.find({id:req.body.id}).remove(function(err,userList){
 			if(err){
 				//if it failed, return error
-				res.send("There was a problem removing the vehicle from the database.");
+				res.send("There was a problem removing the user from the database.");
 			}
 			else{
-				console.log(vehicle.vehicle.type + " removed");
-				//Forward to success page
-				res.redirect("vehicleList");
-				//And set the header so the address bar doesn't still say /addemp
-				res.location("vehicleList");
+				next();
 			}
 		});
 	}
@@ -108,5 +100,19 @@ exports.reserveVehicle = function(db){
 		 		});
 		 	}
 		});
+	}
+}
+
+exports.updateVehicleLocation = function(db){
+	return function(req,res,next){
+		Vehicle.find({name:req.body.name}).update({$set:{location:req.body.location}}, function(err, userList){
+			if(err){
+				//if it failed, return error
+				res.send("There was a problem adding the information to the database.");
+			}
+			else{
+				next();
+			}
+		}); 
 	}
 }	

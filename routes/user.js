@@ -3,14 +3,16 @@
 	################	----2013----	################
 	################					################
 */
+var User = require('../models/user.js');
 
 // Login procedure of a user
 // If login is successful, redirects to the home page
 exports.userLogin = function(db){
 	return function(req, res, next){
-		var collection = db.get('userCollection');
-  		var user = req.body;
-  		collection.find({"user.name" : user.user.name, "user.password" : user.user.password}, function(err,fetchedUser){
+		// var collection = db.get('userCollection');
+  // 		var user = req.body;
+  // 		collection.find({"user.name" : user.user.name, "user.password" : user.user.password}, function(err,fetchedUser){
+		User.find({name : req.body.name, password : req.body.password}, function(err,fetchedUser){
 			if(err){
 				//if it failed, return error
 				res.send("There was a problem retrieving the user from the database.");
@@ -24,7 +26,6 @@ exports.userLogin = function(db){
     				req.session.user_id = fetchedUser[0]._id;
        				next();
   				}
-  					
     		}	
 		});
   	};
@@ -61,8 +62,7 @@ exports.checkAuthUser = function(db, development){
 // Prints the user list on the browser
 exports.userList = function(db){
 	return function(req, res){
-		var collection = db.get('userCollection');
-		collection.find({}, {}, function(e, userList){
+		User.find({},{}, function(err, userList){	
 			res.render('userList',{
 				"userList": userList
 			});
@@ -70,17 +70,20 @@ exports.userList = function(db){
 	};
 };
 
-// Returns the user list as a response
 exports.userListMobile = function(db){
 	return function(req, res){
-		var collection = db.get('userCollection');
-		collection.find({}, {}, function(e, userList){
+		User.find({}, {}, function(e, userList){
 			console.log(res);
-			res = userList;
+			var body = JSON.stringify(userList);
+ 			res.writeHead(200, {
+				'Content-Length': body.length,
+				'Content-Type': 'application/json'
+			});
+			res.write(body);
+			res.end();
 		});
 	};
 };
-
 
 
 exports.newUser = function(req,res){
@@ -95,9 +98,10 @@ exports.newVehicle = function(req,res){
 // If successful, login procedure follows, and user is redirected to the home page
 exports.addUser = function(db){
 	return function(req, res, next){
-		var collection = db.get('userCollection');
-  		var user = req.body;
-  		collection.insert(user, function(err, userList){
+		// var collection = db.get('userCollection');
+  		// var user = req.body;
+  		// collection.insert(user, function(err, userList){
+  		new User(req.body).save( function(err, userList){	
 			if(err){
 				//if it failed, return error
 				res.send("There was a problem adding the information to the database.");
@@ -119,40 +123,29 @@ exports.deleteUser = function(req, res){
 
 // Removes a user from the user list
 exports.removeUser = function(db){
-	return function(req,res){
-		var collection = db.get('userCollection');
-		var user = req.body;
-		//Submit to the DB
-		collection.remove({"user.id" : user.user.id}, function(err,userList){
+	return function(req,res, next){
+		User.find({id:req.body.id}).remove(function(err,userList){
 			if(err){
 				//if it failed, return error
 				res.send("There was a problem removing the user from the database.");
 			}
 			else{
-				console.log(user.user.name + " removed");
-				//Forward to success page
-				res.redirect("userList");
-				//And set the header so the address bar doesn't still say /addemp
-				res.location("userList");
+				next();
 			}
 		});
 	}
 }
 
 exports.updateUserLocation = function(db){
-	return function(req,res){
-
-	  	var collection = db.get('userCollection');
-	  	var name = req.body.user.name;
-	  	var location = req.body.user.location;
-		// collection.remove({"vuPair.id" : vuPair.vuPair.id}, function(err, vuPairList){
-	  	console.log(location);
-   		collection.update({"user.name":name}, {$set:{"user.location":location}}, function(err, userList){
-		 	if(err){
-		 		//if it failed, return error
-		 		res.send("There was a problem adding the information to the database.");
-		 	}
-		 });
-		// console.log(req);
+	return function(req,res,next){
+		User.find({name:req.body.name}).update({$set:{location:req.body.location}}, function(err, userList){
+			if(err){
+				//if it failed, return error
+				res.send("There was a problem adding the information to the database.");
+			}
+			else{
+				next();
+			}
+		}); 
 	}
 }

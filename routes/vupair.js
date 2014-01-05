@@ -3,6 +3,7 @@
 	################	----2013----	################
 	################					################
 */
+var Pair = require('../models/pair.js');
 
 // Prints the vuPair list on the browser
 exports.vuPairList = function(db){
