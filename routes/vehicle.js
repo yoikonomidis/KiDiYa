@@ -82,10 +82,10 @@ exports.reserveVehicle = function(db){
 		collection.update({"vehicle.id":id}, {$set:{"vehicle.locked":0}}, function(err, updated){
 		 	if(err){
 		 		//if it failed, return error
-		 		console.log("There was a problem updating the information to the database.");
+		 		console.logger("There was a problem updating the information to the database.");
 		 	}
 		 	else{
-		 		console.log("Vehicle with id " + id + " was unlocked " + updated);
+		 		console.logger("Vehicle with id " + id + " was unlocked " + updated);
 
 		 		// We reserve the vehicle
 		 		collection.update({"vehicle.id":id}, {$set:{"vehicle.reserved":1}}, function(err){
@@ -94,7 +94,7 @@ exports.reserveVehicle = function(db){
 		 				res.send("There was a problem updating the information to the database.");
 		 			}
 		 			else{
-		 				console.log("Vehicle with id " + id + " was reserved");
+		 				console.logger("Vehicle with id " + id + " was reserved");
 		 				next();
 		 			}
 		 		});
