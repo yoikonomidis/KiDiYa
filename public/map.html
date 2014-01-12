@@ -87,17 +87,30 @@
 			google.maps.event.addDomListener(window, 'load', initialize);
 		</script>
 		<script>
-    		function codeLatLngSocket(){
-    			$(document).ready(function(){
+			// io = io.connect()
+
+			// // Emit ready event.
+			// io.emit('ready') 
+
+			// // Listen for the talk event.
+			// io.on('talk', function(data) {
+   //  			console.log(data.message)
+			// })  
+    		//function codeLatLngSocket(){
+    			//$(document).ready(function(){
     				console.log("CLIENT");
-    				var socket = io.connect("http://localhost:3000/");
-      				socket.on('news', function (data) {
-						console.log(JSON.stringify(data));
-						socket.emit('my other event', { id: 52 });
-					});	
-					// socket.emit('id',42);
-    			});
-    		}
+    				io = io.connect();
+    				io.emit('getVehicleLocation2',{id: 4});
+    				io.on('talk', function(data){
+    					console.log(data);
+    				});
+    	// 			var socket = io.connect("http://localhost:3000/");
+     //  				socket.on('news', function (data) {
+					// 	console.log(JSON.stringify(data));
+					// 	socket.emit('my other event', { id: 52 });
+					// });	
+    			//});
+    		//}
      	</script>
 
 		<style>

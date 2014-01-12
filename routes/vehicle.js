@@ -133,31 +133,20 @@ exports.getVehicleLocationAjax = function(db){
 	}
 }	
 
-exports.getVehicleLocationSocket = function(db){
-	return function(req,res){
-		console.log("Request received");
-		console.log(req.query);
-		Vehicle.find({id:req.query.id}, function(err,vehicle){
+exports.getVehicleLocationSocket = function(db,data){
+		Vehicle.find({id:data.id}, function(err,vehicle){
 			if(err){
 				//if it failed, return error
-				res.send("There was a problem getting the data from the database.");
+				console.log(err);
+				// res.send("There was 0a problem getting the data from the database.");
 			}
 			else{
-				var body = JSON.stringify(vehicle);
+				// var body = JSON.stringify(vehicle);
 				//Uncomment this line to avoid cross-domain errors
-				res.setHeader("Access-Control-Allow-Origin", "*");
-				res.send(body);
-				console.log(vehicle);
-				console.log(body);
-				// io.socket.on('connection', function(socket){
-				// 	console.log("Request received");
-				// 	io.socket.emit('news', { location: {longitude: 52, latitude:4}});
-				// 	io.socket.on('my other event', function (id) {
-				// 		console.log(id);
-				// 		console.log("done");
-  		// 			});
-  		// 		});
+				// res.setHeader("Access-Control-Allow-Origin", "*");
+				// res.send(body);
+				console.log(vehicle[0].location);
 			}
 		});
-	}
+	
 }

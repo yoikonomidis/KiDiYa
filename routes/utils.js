@@ -43,11 +43,11 @@ exports.map = function map(fs) {
   return function(req,res){
     fs.readFile("./public/map.html", function(err, contents) {
      if(!err) {
-        req.io.route('hello')
         res.setHeader("Content-Length", contents.length);
         res.setHeader("Content-Type");
         res.statusCode = 200;
-        res.end(contents);
+        res.end(contents); 
+        // req.io.route('getVehicleLocation2');
      } else {
         res.writeHead(500);
         res.end();

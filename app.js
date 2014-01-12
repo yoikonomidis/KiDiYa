@@ -16,7 +16,6 @@ var user = require('./routes/user.js');
 var vehicle = require('./routes/vehicle.js');
 var vupair = require('./routes/vupair.js');
 var utils = require('./routes/utils.js');
-// var io = require("socket.io");
 var fs = require('fs');
 
 // connect to Mongo when the app initializes
@@ -32,19 +31,11 @@ app.use(express.logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
-app.use(express.cookieParser('your secret here'));
-app.use(express.session());
+
+// app.use(express.cookieParser('your secret here'));
+// app.use(express.session());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
-
-
-// var httpServer = http.createServer(app).listen(app.get('port'), function(){
-//   console.log('Express server listening on port ' + app.get('port'));
-// });
-
-// var httpServer = http.createServer(app).listen(app.get('port'), function(){
-//   console.log('Express server listening on port ' + app.get('port'));
-// });
 
 var development = true;
 
@@ -64,27 +55,19 @@ var development = true;
 
 app.post('/userLogin', user.userLogin(db), routes.index);
 app.get('/userLogout', user.userLogout(db), routes.index);
-app.get('/', user.checkAuthUser(db, development), function(req) {
-    req.io.route('hello')});//routes.index);
-app.get('/map',user.checkAuthUser(db, development), function(req) {
-    req.io.route('hello')}); //utils.map(fs, io));
-
+app.get('/', user.checkAuthUser(db, development), routes.index);
+app.get('/map',user.checkAuthUser(db, development), utils.map(fs));
 app.get('/userList',  user.checkAuthUser(db, development), user.userList(db));
 app.get('/userListMobile',  user.checkAuthUser(db, development), user.userListMobile(db));
-// app.get('/newUser', routes.newUser);
-// app.get('/deleteUser',  routes.checkAuthUser(db), routes.deleteUser);
 app.post('/addUser', user.addUser(db), user.userList(db));
 app.post('/removeUser', user.removeUser(db),user.userList(db));
-
 app.get('/vehicleList',  user.checkAuthUser(db, development), vehicle.vehicleList(db));
 app.get('/vehicleListMobile',  user.checkAuthUser(db, development), vehicle.vehicleListMobile(db));
-// app.get('/newVehicle', routes.newVehicle);
-// app.get('/deleteVehicle',  routes.checkAuthUser(db), routes.deleteVehicle);
 app.post('/addVehicle', vehicle.addVehicle(db), vehicle.vehicleList(db));
 app.post('/removeVehicle', vehicle.removeVehicle(db),vehicle.vehicleList(db));
 app.post('/reserveVehicle', vehicle.reserveVehicle(db), vehicle.vehicleList(db));
 app.get('/getVehicleLocationAjax', vehicle.getVehicleLocationAjax(db));
-app.get('/getVehicleLocationSocket', vehicle.getVehicleLocationSocket(db));
+// app.get('/getVehicleLocationSocket', vehicle.getVehicleLocationSocket(db));
 
 app.get('/vuPairList',  user.checkAuthUser(db, development), vupair.vuPairList(db));
 app.get('/vuPairListMobile',  user.checkAuthUser(db, development), vupair.vuPairListMobile(db));
@@ -95,25 +78,14 @@ app.post('/updateUserLocation',user.updateUserLocation(db), user.userListMobile(
 app.post('/updateVehicleLocation',vehicle.updateVehicleLocation(db), vehicle.vehicleListMobile(db));
 app.get('/cleanDatabase', utils.cleanDatabase(db));
 
-app.io.route('hello', function(req) {
-    console.log("TARATATA");
+app.io.route('getVehicleLocation2', function(req) {
+	vehicle.getVehicleLocationSocket(db,req.data);
+	console.log(req.data);
+    req.io.emit('talk', {
+    
+    })
 })
 
-
-// io.listen(httpServer).sockets.on('connection', function (socket) {
-// 	socket.emit('news', { location: {longitude: 52, latitude:8}});
-// 	socket.on('my other event', function (data) {
-// 		console.log(data);
-//   	});
-//   	// socket.on('id',vehicle.getVehicleLocationSocket(db));
-//   	socket.on('disconnect', function(data){
-//   		console.log("Socket dissconected");
-//   	});
-// });
-
-
-// io.listen(httpServer).sockets.on('connection', function () {
-//   	console.log("Socket Started");
-// });
-
-app.listen(3000);
+app.listen(app.get('port'), function(){
+  console.log('Express server listening on port ' + app.get('port'));
+});
