@@ -5,7 +5,6 @@
 */
 
 var Vehicle = require('../models/vehicle.js');
-
 // Prints the vehicle list on the browser
 exports.vehicleList = function(db){
 	return function(req, res){
@@ -20,9 +19,9 @@ exports.vehicleList = function(db){
 // Returns the vehicle list as a response
 exports.vehicleListMobile = function(db){
 	return function(req, res){
-		var collection = db.get('vehicleCollection');
-		collection.find({}, {}, function(e, vehicleList){
-			res = vehicleList;
+		Vehicle.find({},{}, function(e, vehicleList){
+			var body = JSON.stringify(vehicleList);
+			res.send(body);
 		});
 	};
 };
@@ -40,10 +39,6 @@ exports.addVehicle = function(db){
 				res.send("There was a problem adding the information to the database.");
 			}
 			else{
-				// //Forward to success page
-				// res.redirect("vehicleList");
-				// //And set the header so the address bar doesn't still say /addUser
-				// res.location("vehicleList");
 				next();
 			}
 		});
@@ -115,4 +110,54 @@ exports.updateVehicleLocation = function(db){
 			}
 		}); 
 	}
+}
+
+exports.getVehicleLocationAjax = function(db){
+	return function(req,res){
+		console.log("Request received");
+		console.log(req.query);
+		Vehicle.find({id:req.query.id}, function(err,vehicle){
+			if(err){
+				//if it failed, return error
+				res.send("There was a problem getting the data from the database.");
+			}
+			else{
+				var body = JSON.stringify(vehicle);
+				//Uncomment this line to avoid cross-domain errors
+				res.setHeader("Access-Control-Allow-Origin", "*");
+				res.send(body);
+				console.log(vehicle);
+				console.log(body);
+			}
+		});
+	}
 }	
+
+exports.getVehicleLocationSocket = function(db){
+	return function(req,res){
+		console.log("Request received");
+		console.log(req.query);
+		Vehicle.find({id:req.query.id}, function(err,vehicle){
+			if(err){
+				//if it failed, return error
+				res.send("There was a problem getting the data from the database.");
+			}
+			else{
+				var body = JSON.stringify(vehicle);
+				//Uncomment this line to avoid cross-domain errors
+				res.setHeader("Access-Control-Allow-Origin", "*");
+				res.send(body);
+				console.log(vehicle);
+				console.log(body);
+				// io.socket.on('connection', function(socket){
+				// 	console.log("Request received");
+				// 	io.socket.emit('news', { location: {longitude: 52, latitude:4}});
+				// 	io.socket.on('my other event', function (id) {
+				// 		console.log(id);
+				// 		console.log("done");
+  		// 			});
+  		// 		});
+			}
+		});
+	}
+}

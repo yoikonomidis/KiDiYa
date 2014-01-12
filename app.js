@@ -7,20 +7,18 @@
 /**
  * Module dependencies.
  */
+// var express = require('express.io');
 var express = require('express');
+var http = require('http');
+var path = require('path');
+var mongoose = require('mongoose');
 var routes = require('./routes');
 var user = require('./routes/user.js');
 var vehicle = require('./routes/vehicle.js');
 var vupair = require('./routes/vupair.js');
 var utils = require('./routes/utils.js');
-var http = require('http');
-var path = require('path');
-var mongoose = require('mongoose');
-
-// //Connect to MongoDB
-// var mongo = require('mongodb');
-// var monk = require('monk');
-// var db = monk('localhost:27017/nodetest1');
+var io = require("socket.io");
+var fs = require('fs');
 
 // connect to Mongo when the app initializes
 var db = mongoose.connect('mongodb://localhost:27017/nodetest1');
@@ -40,6 +38,18 @@ app.use(express.session());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+var httpServer = http.createServer(app).listen(app.get('port'), function(){
+  console.log('Express server listening on port ' + app.get('port'));
+});
+
+
+
+// var httpServer = http.createServer(app).listen(app.get('port'), function(){
+//   console.log('Express server listening on port ' + app.get('port'));
+// });
+// app.http().io();
+
 var development = true;
 
 // // development only
@@ -49,9 +59,17 @@ var development = true;
 // }
 
 // Order matters! Nodejs will match the incoming request to the first
+// app.io.route('ready', function(req) {
+// 	console.log("IO received");
+//     req.io.emit('talk', {
+//         message: 'io event from an io route on the server'
+//     });
+// });
+
 app.post('/userLogin', user.userLogin(db), routes.index);
 app.get('/userLogout', user.userLogout(db), routes.index);
 app.get('/', user.checkAuthUser(db, development), routes.index);
+app.get('/map',user.checkAuthUser(db, development), utils.map(fs));
 
 app.get('/userList',  user.checkAuthUser(db, development), user.userList(db));
 app.get('/userListMobile',  user.checkAuthUser(db, development), user.userListMobile(db));
@@ -67,6 +85,8 @@ app.get('/vehicleListMobile',  user.checkAuthUser(db, development), vehicle.vehi
 app.post('/addVehicle', vehicle.addVehicle(db), vehicle.vehicleList(db));
 app.post('/removeVehicle', vehicle.removeVehicle(db),vehicle.vehicleList(db));
 app.post('/reserveVehicle', vehicle.reserveVehicle(db), vehicle.vehicleList(db));
+app.get('/getVehicleLocationAjax', vehicle.getVehicleLocationAjax(db));
+app.get('/getVehicleLocationSocket', vehicle.getVehicleLocationSocket(db));
 
 app.get('/vuPairList',  user.checkAuthUser(db, development), vupair.vuPairList(db));
 app.get('/vuPairListMobile',  user.checkAuthUser(db, development), vupair.vuPairListMobile(db));
@@ -77,8 +97,21 @@ app.post('/updateUserLocation',user.updateUserLocation(db), user.userListMobile(
 app.post('/updateVehicleLocation',vehicle.updateVehicleLocation(db), vehicle.vehicleListMobile(db));
 app.get('/cleanDatabase', utils.cleanDatabase(db));
 
-http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+
+io.listen(httpServer).sockets.on('connection', function (socket) {
+	socket.emit('news', { location: {longitude: 52, latitude:8}});
+	socket.on('my other event', function (data) {
+		console.log(data);
+  	});
+  	socket.on('id',vehicle.getVehicleLocationSocket(db));
+  	socket.on('disconnect', function(data){
+  		console.log("Socket dissconected");
+  	});
 });
 
 
+// io.listen(httpServer).sockets.on('connection', function () {
+//   	console.log("Socket Started");
+// });
+
+// app.listen(3000);
