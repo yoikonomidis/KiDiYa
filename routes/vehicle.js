@@ -133,20 +133,25 @@ exports.getVehicleLocationAjax = function(db){
 	}
 }	
 
-exports.getVehicleLocationSocket = function(db,data){
-		Vehicle.find({id:data.id}, function(err,vehicle){
+exports.getVehicleLocationSocket = function(db){
+	return function(req){
+		console.log(req.data)
+		Vehicle.find({id:req.data.id}, function(err,vehicle){
 			if(err){
 				//if it failed, return error
 				console.log(err);
 				// res.send("There was 0a problem getting the data from the database.");
 			}
 			else{
-				// var body = JSON.stringify(vehicle);
+				var body = JSON.stringify(vehicle);
 				//Uncomment this line to avoid cross-domain errors
 				// res.setHeader("Access-Control-Allow-Origin", "*");
+				console.log(vehicle);
 				// res.send(body);
-				console.log(vehicle[0].location);
+				req.io.emit('talk', vehicle)
+				// console.log(vehicle[0].location);
+				// res.body = vehicle[0].location			
 			}
-		});
-	
+		});	
+	}
 }
