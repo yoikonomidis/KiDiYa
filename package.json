@@ -12,6 +12,6 @@
     "nodeunit" : "*",
     "mongoose" : "*",
     "socket.io": "*",
-    "express.io":"*"
+    "express.io": "*"
   }
 }

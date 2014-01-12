@@ -7,8 +7,7 @@
 /**
  * Module dependencies.
  */
-// var express = require('express.io');
-var express = require('express');
+var express = require('express.io');
 var http = require('http');
 var path = require('path');
 var mongoose = require('mongoose');
@@ -17,12 +16,12 @@ var user = require('./routes/user.js');
 var vehicle = require('./routes/vehicle.js');
 var vupair = require('./routes/vupair.js');
 var utils = require('./routes/utils.js');
-var io = require("socket.io");
+// var io = require("socket.io");
 var fs = require('fs');
 
 // connect to Mongo when the app initializes
 var db = mongoose.connect('mongodb://localhost:27017/nodetest1');
-var app = express();
+var app = express().http().io();
 
 // all environments
 app.set('port', process.env.PORT || 3000); // Whatever is in the environment variable PORT, or 3000 if there's nothing there
@@ -39,16 +38,13 @@ app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-var httpServer = http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
-});
-
-
+// var httpServer = http.createServer(app).listen(app.get('port'), function(){
+//   console.log('Express server listening on port ' + app.get('port'));
+// });
 
 // var httpServer = http.createServer(app).listen(app.get('port'), function(){
 //   console.log('Express server listening on port ' + app.get('port'));
 // });
-// app.http().io();
 
 var development = true;
 
@@ -68,8 +64,10 @@ var development = true;
 
 app.post('/userLogin', user.userLogin(db), routes.index);
 app.get('/userLogout', user.userLogout(db), routes.index);
-app.get('/', user.checkAuthUser(db, development), routes.index);
-app.get('/map',user.checkAuthUser(db, development), utils.map(fs));
+app.get('/', user.checkAuthUser(db, development), function(req) {
+    req.io.route('hello')});//routes.index);
+app.get('/map',user.checkAuthUser(db, development), function(req) {
+    req.io.route('hello')}); //utils.map(fs, io));
 
 app.get('/userList',  user.checkAuthUser(db, development), user.userList(db));
 app.get('/userListMobile',  user.checkAuthUser(db, development), user.userListMobile(db));
@@ -97,21 +95,25 @@ app.post('/updateUserLocation',user.updateUserLocation(db), user.userListMobile(
 app.post('/updateVehicleLocation',vehicle.updateVehicleLocation(db), vehicle.vehicleListMobile(db));
 app.get('/cleanDatabase', utils.cleanDatabase(db));
 
+app.io.route('hello', function(req) {
+    console.log("TARATATA");
+})
 
-io.listen(httpServer).sockets.on('connection', function (socket) {
-	socket.emit('news', { location: {longitude: 52, latitude:8}});
-	socket.on('my other event', function (data) {
-		console.log(data);
-  	});
-  	socket.on('id',vehicle.getVehicleLocationSocket(db));
-  	socket.on('disconnect', function(data){
-  		console.log("Socket dissconected");
-  	});
-});
+
+// io.listen(httpServer).sockets.on('connection', function (socket) {
+// 	socket.emit('news', { location: {longitude: 52, latitude:8}});
+// 	socket.on('my other event', function (data) {
+// 		console.log(data);
+//   	});
+//   	// socket.on('id',vehicle.getVehicleLocationSocket(db));
+//   	socket.on('disconnect', function(data){
+//   		console.log("Socket dissconected");
+//   	});
+// });
 
 
 // io.listen(httpServer).sockets.on('connection', function () {
 //   	console.log("Socket Started");
 // });
 
-// app.listen(3000);
+app.listen(3000);

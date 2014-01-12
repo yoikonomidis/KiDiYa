@@ -23,7 +23,7 @@
 		</style>
 		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-		<script src="http://84.80.46.156:3000/socket.io/socket.io.js"></script>
+		<script src="http://localhost:3000/socket.io/socket.io.js"></script>
 		<script>
 			var geocoder;
 			var map;
@@ -49,7 +49,7 @@
 
 				$(document).ready(function(){
 					$.ajax({
-	 					url: 'http://84.80.46.156:3000/getVehicleLocationAjax',
+	 					url: 'http://localhost:3000/getVehicleLocationAjax',
 						type: 'GET',
 						dataType: 'json',
 						data: {"id": ajaxVehicleId},
@@ -90,12 +90,12 @@
     		function codeLatLngSocket(){
     			$(document).ready(function(){
     				console.log("CLIENT");
-    				var socket = io.connect("http://84.80.46.156:3000/");
+    				var socket = io.connect("http://localhost:3000/");
       				socket.on('news', function (data) {
 						console.log(JSON.stringify(data));
 						socket.emit('my other event', { id: 52 });
 					});	
-					socket.emit('id',42);
+					// socket.emit('id',42);
     			});
     		}
      	</script>
@@ -125,6 +125,6 @@
 	    	<input id="socketVehicleId" type="text" value="1">
 			<input type="button" value="SOCKET: Vehicle ID " onclick="codeLatLngSocket()">
 	    </div>
-	    <div id="map-canvas"></div>
+	    <!-- <div id="map-canvas"></div> -->
 	</body>
 </html>

@@ -41,15 +41,16 @@ exports.cleanDatabase = function(db){
 //show map
 exports.map = function map(fs) {
   return function(req,res){
-    fs.readFile("../ClientSide/map.html", function(err, contents) {
+    fs.readFile("./public/map.html", function(err, contents) {
      if(!err) {
-       res.setHeader("Content-Length", contents.length);
-       res.setHeader("Content-Type");
-       res.statusCode = 200;
-       res.end(contents);
+        req.io.route('hello')
+        res.setHeader("Content-Length", contents.length);
+        res.setHeader("Content-Type");
+        res.statusCode = 200;
+        res.end(contents);
      } else {
-       res.writeHead(500);
-       res.end();
+        res.writeHead(500);
+        res.end();
      }
     });
   }
