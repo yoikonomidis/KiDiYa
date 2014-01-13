@@ -147,10 +147,7 @@ exports.getVehicleLocationSocket = function(db){
 				//Uncomment this line to avoid cross-domain errors
 				// res.setHeader("Access-Control-Allow-Origin", "*");
 				console.log(vehicle);
-				// res.send(body);
-				req.io.emit('talk', vehicle)
-				// console.log(vehicle[0].location);
-				// res.body = vehicle[0].location			
+				req.io.emit('talk', vehicle)		
 			}
 		});	
 	}

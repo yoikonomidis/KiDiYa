@@ -87,31 +87,45 @@
 			google.maps.event.addDomListener(window, 'load', initialize);
 		</script>
 		<script>
-			// io = io.connect()
-
-			// // Emit ready event.
-			// io.emit('ready') 
-
-			// // Listen for the talk event.
-			// io.on('talk', function(data) {
-   //  			console.log(data.message)
-			// })  
-    		//function codeLatLngSocket(){
-    			//$(document).ready(function(){
+			//if io.connect is moved in the function, the conenction breaks after use.
+			io = io.connect();
+    		function codeLatLngSocket(){
+    			var lat;
+				var lng;
+				var latlng;
+    			var socketVehicleId = document.getElementById('socketVehicleId').value;
+    			$(document).ready(function(){
     				console.log("CLIENT");
-    				io = io.connect();
-    				io.emit('getVehicleLocation2',{id: 4});
+    				io.emit('getVehicleLocation2',{id: socketVehicleId});
     				io.on('talk', function(data){
-    					console.log(data[0].location.longitude);
+    					lat = data[0].location.latitude;
+    					lng = data[0].location.longitude;
+    					latlng = new google.maps.LatLng(lat, lng);
+							geocoder.geocode({'latLng': latlng}, function(results, status) {
+	          					if (status == google.maps.GeocoderStatus.OK) {
+									if (results[1]) {
+										map.setZoom(18);
+										marker = new google.maps.Marker({
+											position: latlng,
+											ap: map
+										});
+										infowindow.setContent(results[1].formatted_address);
+										infowindow.open(map, marker);
+									} 
+									else {
+										alert('No results found');
+									}
+								}
+								else {
+									alert('Geocoder failed due to: ' + status);
+								}
+							});
     					console.log(data[0].location.latitude);
-    				});
-    	// 			var socket = io.connect("http://localhost:3000/");
-     //  				socket.on('news', function (data) {
-					// 	console.log(JSON.stringify(data));
-					// 	socket.emit('my other event', { id: 52 });
-					// });	
-    			//});
-    		//}
+    					console.log(data[0].location.longitude);
+    				});	
+    			});
+    		}
+    		google.maps.event.addDomListener(window, 'load', initialize);
      	</script>
 
 		<style>
@@ -139,6 +153,6 @@
 	    	<input id="socketVehicleId" type="text" value="1">
 			<input type="button" value="SOCKET: Vehicle ID " onclick="codeLatLngSocket()">
 	    </div>
-	    <!-- <div id="map-canvas"></div> -->
+	    <div id="map-canvas"></div>
 	</body>
 </html>
