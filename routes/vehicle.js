@@ -147,6 +147,29 @@ exports.getVehicleLocationSocket = function(db){
 	}
 }
 
+exports.getVehicleLocation = function(db){
+	return function(req){
+		console.log(req.data);
+		req.io.join(req.data);
+	}
+}
+
+exports.broadcastVehiclesLocation = function(app, db){
+	return function(){
+		console.log("Broadcast vehicles location...");
+		Vehicle.find({name:1},{name:1,location:1}, function(err,result){
+			if(err){
+				//if it failed, return error
+				console.log(err);
+				// res.send("There was 0a problem getting the data from the database.");
+			}
+			else{
+				// console.log(result);
+				app.io.room(1).broadcast('talk', result);	
+			}
+		});
+	}
+}
 // exports.getVehicleLocationSocket = function(db,callback){
 // 	return function(req){
 // 		console.log(req.data)

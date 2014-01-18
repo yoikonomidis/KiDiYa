@@ -1,6 +1,6 @@
 /*	################					################
 	################	KiDiYa Project	################
-	################	----2013----	################
+	################	----2014----	################
 	################					################
 */
 
@@ -78,14 +78,14 @@ app.post('/updateUserLocation',user.updateUserLocation(db), user.userListMobile(
 app.post('/updateVehicleLocation',vehicle.updateVehicleLocation(db), vehicle.vehicleListMobile(db));
 app.get('/cleanDatabase', utils.cleanDatabase(db));
 
-// app.io.route('getVehicleLocation2', vehicle.getVehicleLocationSocket(db))
-app.io.route('getVehicleLocation2', vehicle.getVehicleLocationSocket(db,function(data){
-		console.log(data);
-		// req.io.emit('talk',vehicle);
-	}));
+app.io.route('getVehicleLocation', vehicle.getVehicleLocation(db))
+// app.io.route('getVehicleLocation2', vehicle.getVehicleLocationSocket(db));
 	// io.emit('talk',vehicle.getVehicleLocationSocket(db));
 
 // 
+
+setInterval(vehicle.broadcastVehiclesLocation(app, db), 10000);
+
 app.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
