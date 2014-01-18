@@ -116,18 +116,15 @@ exports.getVehicleLocationAjax = function(db){
 	return function(req,res){
 		console.log("Request received");
 		console.log(req.query);
-		Vehicle.find({id:req.query.id}, function(err,vehicle){
+		Vehicle.find({name:req.query.name},{name:1,location:1}, function(err,result){
 			if(err){
 				//if it failed, return error
 				res.send("There was a problem getting the data from the database.");
 			}
 			else{
-				var body = JSON.stringify(vehicle);
 				//Uncomment this line to avoid cross-domain errors
 				res.setHeader("Access-Control-Allow-Origin", "*");
-				res.send(body);
-				console.log(vehicle);
-				console.log(body);
+				res.send(result);
 			}
 		});
 	}
@@ -136,19 +133,37 @@ exports.getVehicleLocationAjax = function(db){
 exports.getVehicleLocationSocket = function(db){
 	return function(req){
 		console.log(req.data)
-		Vehicle.find({id:req.data.id}, function(err,vehicle){
+		Vehicle.find({name:req.data.name},{name:1,location:1}, function(err,result){
 			if(err){
 				//if it failed, return error
 				console.log(err);
 				// res.send("There was 0a problem getting the data from the database.");
 			}
 			else{
-				var body = JSON.stringify(vehicle);
-				//Uncomment this line to avoid cross-domain errors
-				// res.setHeader("Access-Control-Allow-Origin", "*");
-				console.log(vehicle);
-				req.io.emit('talk', vehicle)		
+				console.log(result);
+				req.io.emit('talk', result)		
 			}
 		});	
 	}
 }
+
+// exports.getVehicleLocationSocket = function(db,callback){
+// 	return function(req){
+// 		console.log(req.data)
+// 		Vehicle.find({id:req.data.id}, function(err,result){
+// 			if(err){
+// 				//if it failed, return error
+// 				console.log(err);
+// 				// res.send("There was 0a problem getting the data from the database.");
+// 			}
+// 			else{
+// 				// var body = JSON.stringify(result);
+// 				//Uncomment this line to avoid cross-domain errors
+// 				// res.setHeader("Access-Control-Allow-Origin", "*");
+// 				// console.log(vehicle);
+// 				// req.io.emit('talk', vehicle)
+// 				callback(result);	
+// 			}
+// 		});	
+// 	}
+// }

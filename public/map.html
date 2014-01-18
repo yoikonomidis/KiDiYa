@@ -27,12 +27,13 @@
 		<script>
 			var geocoder;
 			var map;
-			var infowindow = new google.maps.InfoWindow();
+			// var infowindow = new google.maps.InfoWindow();
+			// var marker = new google.maps.Marker();
 			var marker;
 			
 			function initialize() {
 				geocoder = new google.maps.Geocoder();
-				var latlng = new google.maps.LatLng(40.730885,-73.997383);
+				var latlng = new google.maps.LatLng(52.0236377,4.3533367);
 				var mapOptions = {
 					zoom: 18,
 					center: latlng,
@@ -45,19 +46,19 @@
 				var lat;
 				var lng;
 				var latlng;
-				var ajaxVehicleId = document.getElementById('ajaxVehicleId').value;
+				var ajaxVehicleName = document.getElementById('ajaxVehicleName').value;
 
 				$(document).ready(function(){
 					$.ajax({
 	 					url: 'http://localhost:3000/getVehicleLocationAjax',
 						type: 'GET',
 						dataType: 'json',
-						data: {"id": ajaxVehicleId},
+						data: {"name": ajaxVehicleName},
 						error: function(xhr,status, error){
 							console.log(status);
 						},
 						success: function (result) {
-							console.log(result[0].location.latitude);
+							console.log(result);
 							lat = result[0].location.latitude;
 	 						lng = result[0].location.longitude;
 							latlng = new google.maps.LatLng(lat, lng);
@@ -67,10 +68,10 @@
 										map.setZoom(18);
 										marker = new google.maps.Marker({
 											position: latlng,
-											ap: map
+											map: map
 										});
-										infowindow.setContent(results[1].formatted_address);
-										infowindow.open(map, marker);
+										// infowindow.setContent(results[1].formatted_address);
+										// infowindow.open(map, marker);
 									} 
 									else {
 										alert('No results found');
@@ -93,11 +94,12 @@
     			var lat;
 				var lng;
 				var latlng;
-    			var socketVehicleId = document.getElementById('socketVehicleId').value;
+    			var socketVehicleName = document.getElementById('socketVehicleName').value;
     			$(document).ready(function(){
-    				console.log("CLIENT");
-    				io.emit('getVehicleLocation2',{id: socketVehicleId});
+					console.log("CLIENT");
+    				io.emit('getVehicleLocation2',{name: socketVehicleName});
     				io.on('talk', function(data){
+    					console.log(data);
     					lat = data[0].location.latitude;
     					lng = data[0].location.longitude;
     					latlng = new google.maps.LatLng(lat, lng);
@@ -107,10 +109,10 @@
 										map.setZoom(18);
 										marker = new google.maps.Marker({
 											position: latlng,
-											ap: map
+											map: map
 										});
-										infowindow.setContent(results[1].formatted_address);
-										infowindow.open(map, marker);
+										// infowindow.setContent(results[1].formatted_address);
+										// infowindow.open(map, marker);
 									} 
 									else {
 										alert('No results found');
@@ -148,9 +150,9 @@
 
 	<body>
 		<div id="panel">
-			<input id="ajaxVehicleId" type="text" value="1">
+			<input id="ajaxVehicleName" type="text" value="1">
 			<input type="button" value="AJAX: Vehicle ID " onclick="codeLatLngAjax()">
-	    	<input id="socketVehicleId" type="text" value="1">
+	    	<input id="socketVehicleName" type="text" value="1">
 			<input type="button" value="SOCKET: Vehicle ID " onclick="codeLatLngSocket()">
 	    </div>
 	    <div id="map-canvas"></div>

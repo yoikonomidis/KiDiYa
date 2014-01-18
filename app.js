@@ -78,8 +78,14 @@ app.post('/updateUserLocation',user.updateUserLocation(db), user.userListMobile(
 app.post('/updateVehicleLocation',vehicle.updateVehicleLocation(db), vehicle.vehicleListMobile(db));
 app.get('/cleanDatabase', utils.cleanDatabase(db));
 
-app.io.route('getVehicleLocation2', vehicle.getVehicleLocationSocket(db))
+// app.io.route('getVehicleLocation2', vehicle.getVehicleLocationSocket(db))
+app.io.route('getVehicleLocation2', vehicle.getVehicleLocationSocket(db,function(data){
+		console.log(data);
+		// req.io.emit('talk',vehicle);
+	}));
+	// io.emit('talk',vehicle.getVehicleLocationSocket(db));
 
+// 
 app.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
