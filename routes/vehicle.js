@@ -150,24 +150,126 @@ exports.getVehicleLocationSocket = function(db){
 exports.getVehicleLocation = function(db){
 	return function(req){
 		console.log(req.data);
-		req.io.join(req.data);
+		for (var i = req.data.length - 1; i >= 0; i--) {
+			req.io.join(req.data[i]);
+		};
 	}
 }
 
-exports.broadcastVehiclesLocation = function(app, db){
+exports.broadcastVehiclesLocation = function(app, db, vehicleRoomIds){
 	return function(){
 		console.log("Broadcast vehicles location...");
-		Vehicle.find({name:1},{name:1,location:1}, function(err,result){
-			if(err){
-				//if it failed, return error
-				console.log(err);
-				// res.send("There was 0a problem getting the data from the database.");
-			}
-			else{
-				// console.log(result);
-				app.io.room(1).broadcast('talk', result);	
-			}
-		});
+
+		for (var i = vehicleRoomIds.length; i > 0; i--) {
+			Vehicle.find({name:i},{name:1,location:1}, function(err,result){
+				if(err){
+					//if it failed, return error
+					console.log(err);
+					// res.send("There was 0a problem getting the data from the database.");
+				}
+				else{
+					// console.log(result);
+					app.io.room(i).broadcast('talk', result);	
+				}
+			});
+		};
+		// Vehicle.find({name:1},{name:1,location:1}, function(err,result){
+		// 	if(err){
+		// 		//if it failed, return error
+		// 		console.log(err);
+		// 		// res.send("There was 0a problem getting the data from the database.");
+		// 	}
+		// 	else{
+		// 		// console.log(result);
+		// 		app.io.room(1).broadcast('talk', result);	
+		// 	}
+		// });
+		// Vehicle.find({name:2},{name:1,location:1}, function(err,result){
+		// 	if(err){
+		// 		//if it failed, return error
+		// 		console.log(err);
+		// 		// res.send("There was 0a problem getting the data from the database.");
+		// 	}
+		// 	else{
+		// 		// console.log(result);
+		// 		app.io.room(2).broadcast('talk', result);	
+		// 	}
+		// });
+		// Vehicle.find({name:3},{name:1,location:1}, function(err,result){
+		// 	if(err){
+		// 		//if it failed, return error
+		// 		console.log(err);
+		// 		// res.send("There was 0a problem getting the data from the database.");
+		// 	}
+		// 	else{
+		// 		// console.log(result);
+		// 		app.io.room(3).broadcast('talk', result);	
+		// 	}
+		// });
+	}
+}
+
+exports.dummyUpdateVehiclesLocation = function(app, db, vehicleRoomIds){
+	return function(req){
+		console.log("Update vehicles location...");
+		for (var i = vehicleRoomIds.length; i > 0; i--) {
+			// Vehicle.find({name:i},{}, function(err,vehicle){
+			// 	if(err){
+			// 		//if it failed, return error
+			// 		console.log(err);
+			// 		// res.send("There was 0a problem getting the data from the database.");
+			// 	}
+			// 	else{
+			// 		// console.log(vehicle[0].location);
+			// 		tmplong = vehicle[0].location.longitude  + 0.1;
+			// 		tmplat = vehicle[0].location.latitude + 0.2;
+			// 		Vehicle.update({name:i},{$set:{'location.longitude':tmplong}}, function(err){
+			// 			if(err){
+			// 				//if it failed, return error
+			// 				console.log("There was a problem adding the information to the database.");
+			// 				console.log(err)
+			// 			}
+			// 			else{
+			// 				// next();
+			// 				// console.log(lon.longitude);
+			// 			}
+			// 		});
+			// 		Vehicle.update({name:i},{$set:{'location.latitude':tmplat}}, function(err){
+			// 			if(err){
+			// 				//if it failed, return error
+			// 				console.log("There was a problem adding the information to the database.");
+			// 				console.log(err)
+			// 			}
+			// 			else{
+			// 				// next();
+			// 				// console.log(lon.longitude);
+			// 			}
+			// 		});	
+			// 	}
+			// });
+					Vehicle.update({name:i},{$set:{'location.longitude':(Math.random() * (50.120 - 40.0200) + 40.0200).toFixed(5)}}, function(err){
+						if(err){
+							//if it failed, return error
+							console.log("There was a problem adding the information to the database.");
+							console.log(err)
+						}
+						else{
+							// next();
+							// console.log(result);
+						}
+					});
+					Vehicle.update({name:i},{$set:{'location.latitude':(Math.random() * (20.120 - 30.0200) + 30.0200).toFixed(5)}}, function(err){
+						if(err){
+							//if it failed, return error
+							console.log("There was a problem adding the information to the database.");
+							console.log(err)
+						}
+						else{
+							// next();
+							// console.log(result);
+						}
+					});
+		}
 	}
 }
 // exports.getVehicleLocationSocket = function(db,callback){

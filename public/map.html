@@ -28,8 +28,8 @@
 			var geocoder;
 			var map;
 			var infowindow = new google.maps.InfoWindow();
-			var marker = new google.maps.Marker();
-			var marker;
+			// var marker = new google.maps.Marker();
+			// var marker;
 			
 			function initialize() {
 				geocoder = new google.maps.Geocoder();
@@ -133,38 +133,45 @@
      	<script>
      		io = io.connect();
      		// room = prompt('type a room name');
-     		var socketVehicleName = 1;
+     		var socketVehicleName = [1, 2, 3];
 			// Emit ready event with room name.
 			io.emit('getVehicleLocation', socketVehicleName);
 
 			// Listen for the announce event.
 			io.on('talk', function(data){
-    					console.log(data);
-    					lat = data[0].location.latitude;
-    					lng = data[0].location.longitude;
-    					latlng = new google.maps.LatLng(lat, lng);
-							geocoder.geocode({'latLng': latlng}, function(results, status) {
-	          					if (status == google.maps.GeocoderStatus.OK) {
-									if (results[1]) {
-										map.setZoom(18);
-										marker = new google.maps.Marker({
-											position: latlng,
-											map: map
-										});
-										infowindow.setContent(results[1].formatted_address);
-										infowindow.open(map, marker);
-									} 
-									else {
-										alert('No results found');
-									}
-								}
-								else {
-									alert('Geocoder failed due to: ' + status);
-								}
-							});
-    					console.log(data[0].location.latitude);
-    					console.log(data[0].location.longitude);
-    				});
+				console.log(data);
+    			lat = data[0].location.latitude;
+    			lng = data[0].location.longitude;
+    			latlng = new google.maps.LatLng(lat, lng);
+
+    			var newMarker = new google.maps.Marker({
+					position: latlng,
+					map: map
+				});
+
+				console.log(data[0].location.latitude);
+    			console.log(data[0].location.longitude);
+			});
+    					
+							// geocoder.geocode({'latLng': latlng}, function(results, status) {
+	      //     					if (status == google.maps.GeocoderStatus.OK) {
+							// 		if (results[1]) {
+							// 			map.setZoom(18);
+										
+							// 			// newMarker.setMap(map);
+							// 			// infowindow.setContent(results[1].formatted_address);
+							// 			// infowindow.open(map, newMarker);
+							// 		} 
+							// 		else {
+							// 			alert('No results found');
+							// 		}
+							// 	}
+							// 	else {
+							// 		alert('Geocoder failed due to: ' + status);
+							// 	}
+							// });
+    					
+    				
      	</script>
 
 		<style>

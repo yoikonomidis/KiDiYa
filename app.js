@@ -82,9 +82,19 @@ app.io.route('getVehicleLocation', vehicle.getVehicleLocation(db))
 // app.io.route('getVehicleLocation2', vehicle.getVehicleLocationSocket(db));
 	// io.emit('talk',vehicle.getVehicleLocationSocket(db));
 
-// 
+// The array containing all the vehicle ids  which also serve as express.io room identifiers
+var vehicleRoomIds = [ 	"1",
+						"2",
+						"3"
+						]
 
-setInterval(vehicle.broadcastVehiclesLocation(app, db), 10000);
+// Broadcast the vehicles location to the registered users
+// TODO: instead of periodically sending the information, send it on database update events
+setInterval(vehicle.broadcastVehiclesLocation(app, db, vehicleRoomIds), 10000);
+
+// Update database with dummy vehicles location - Simulate vehicle movement
+// TODO: update database using client side on vehicles
+setInterval(vehicle.dummyUpdateVehiclesLocation(app, db, vehicleRoomIds), 10000);
 
 app.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
