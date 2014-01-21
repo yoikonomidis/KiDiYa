@@ -40,7 +40,7 @@ exports.userLogout = function(db){
 
 // Checks whether the user has previously authenticated himself in the system
 exports.checkAuthUser = function(db, development){
-	if(!development){
+	if(development == 'false'){
 		return function(req, res, next){
 			console.log(req.session.user_id);
   			if(!req.session.user_id){
@@ -58,12 +58,19 @@ exports.checkAuthUser = function(db, development){
 
 // Prints the user list on the browser
 exports.userList = function(db){
-	return function(req, res){
-		User.find({},{}, function(err, userList){	
-			res.render('userList',{
-				"userList": userList
+	return function(req, res, next){
+		try{
+			User.find({},{}, function(err, userList){	
+				res.render('userList',{
+					"userList": userList
+				
+				});
 			});
-		});
+			throw err;
+		}catch(err){
+			console.logger("Error in userList");
+			next(err);
+		}
 	};
 };
 

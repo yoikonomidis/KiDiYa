@@ -60,7 +60,7 @@ exports.removeVUPair = function(db){
 				res.send("There was a problem removing the vehicle from the database.");
 			}
 			else{
-				console.log(vuPair.vuPair.type + " removed");
+				console.logger(vuPair.vuPair.type + " removed");
 				//Forward to success page
 				res.redirect("vuPairList");
 				//And set the header so the address bar doesn't still say /addemp
