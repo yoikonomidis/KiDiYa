@@ -46,7 +46,12 @@ while((option = optionsParser.getopt()) !== undefined){
 			httpPort = option.optarg;
 			break;
 		case 'd' :
-			development = option.optarg;
+			if(option.optarg == "true"){
+				development = true;
+			}
+			else{
+				development = false;
+			}
 			console.log('Development mode set to: ' + development);
 			break;
 		case 'h' :
@@ -149,7 +154,7 @@ if(development){
 }
 
 app.listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+  console.logger('Express server listening on port ' + app.get('port'));
 });
 
 // Perform other terminating procedures when exiting with (Ctrl+C)

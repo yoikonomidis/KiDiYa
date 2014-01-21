@@ -40,9 +40,9 @@ exports.userLogout = function(db){
 
 // Checks whether the user has previously authenticated himself in the system
 exports.checkAuthUser = function(db, development){
-	if(development == 'false'){
+	if(!development){
 		return function(req, res, next){
-			console.log(req.session.user_id);
+			console.logger(req.session.user_id);
   			if(!req.session.user_id){
     			res.send('You are not authorized to view this page');
   			}else{
