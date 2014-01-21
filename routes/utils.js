@@ -1,7 +1,7 @@
-/*	################					################
- 	################	KiDiYa Project	################
-	################	----2013----	################
-	################					################
+/*  ################                  ################
+    ################  KiDiYa Project  ################
+    ################  ----2014----    ################
+    ################                  ################
 */
 
 // Clean the database
@@ -37,4 +37,21 @@ exports.cleanDatabase = function(db){
   	//And set the header so the address bar doesn't still say /cleanVessy
   	res.location("/");
  	}
+}
+//show map
+exports.map = function map(fs) {
+  return function(req,res){
+    fs.readFile("./public/map.html", function(err, contents) {
+     if(!err) {
+        res.setHeader("Content-Length", contents.length);
+        res.setHeader("Content-Type");
+        res.statusCode = 200;
+        res.end(contents); 
+        // req.io.route('getVehicleLocation2');
+     } else {
+        res.writeHead(500);
+        res.end();
+     }
+    });
+  }
 }

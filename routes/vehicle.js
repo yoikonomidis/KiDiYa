@@ -1,11 +1,10 @@
 /*	################					################
  	################	KiDiYa Project	################
-	################	----2013----	################
+	################	----2014----	################
 	################					################
 */
 
 var Vehicle = require('../models/vehicle.js');
-
 // Prints the vehicle list on the browser
 exports.vehicleList = function(db){
 	return function(req, res){
@@ -20,9 +19,9 @@ exports.vehicleList = function(db){
 // Returns the vehicle list as a response
 exports.vehicleListMobile = function(db){
 	return function(req, res){
-		var collection = db.get('vehicleCollection');
-		collection.find({}, {}, function(e, vehicleList){
-			res = vehicleList;
+		Vehicle.find({},{}, function(e, vehicleList){
+			var body = JSON.stringify(vehicleList);
+			res.send(body);
 		});
 	};
 };
@@ -40,10 +39,6 @@ exports.addVehicle = function(db){
 				res.send("There was a problem adding the information to the database.");
 			}
 			else{
-				// //Forward to success page
-				// res.redirect("vehicleList");
-				// //And set the header so the address bar doesn't still say /addUser
-				// res.location("vehicleList");
 				next();
 			}
 		});
@@ -70,6 +65,7 @@ exports.removeVehicle = function(db){
 }
 
 // Reserves a vehicle. If successful, it redirects to the vehicle list
+// TODO: Convert to Mongoose
 exports.reserveVehicle = function(db){
 	// We save this in _this so as to use it below, otherwise it goes out of scope and we cannot call functions belonging to it
 	var _this = this;
@@ -103,6 +99,7 @@ exports.reserveVehicle = function(db){
 	}
 }
 
+// Updates a vehicle's location in the database
 exports.updateVehicleLocation = function(db){
 	return function(req,res,next){
 		Vehicle.update({id:req.body.id},{$set:{location:req.body.location}}, function(err, userList){
@@ -116,3 +113,66 @@ exports.updateVehicleLocation = function(db){
 		}); 
 	}
 }	
+
+// Register a user to the appropriate rooms so as to send vehicles' location
+exports.getVehicleLocation = function(db){
+	return function(req){
+		console.log(req.data);
+		for (var i = req.data.length - 1; i >= 0; i--) {
+			req.io.join(req.data[i]);
+		};
+	}
+}
+
+// Periodically broadcast vehicles' location
+// TODO: Broadcast only when a location has been updated in the database
+exports.broadcastVehiclesLocation = function(app, db, vehicleRoomIds){
+	return function(){
+		console.log("Broadcast vehicles location...");
+
+		for (var i = vehicleRoomIds.length; i > 0; i--) {
+			Vehicle.find({name:i},{name:1,location:1}, function(err,result){
+				if(err){
+					//if it failed, return error
+					console.log(err);
+					// res.send("There was 0a problem getting the data from the database.");
+				}
+				else{
+					// console.log(result);
+					app.io.room(i).broadcast('talk', result);	
+				}
+			});
+		};
+	}
+}
+
+// Generate (random)location updates in the database
+// NOTE: Development MODE only
+exports.dummyUpdateVehiclesLocation = function(app, db, vehicleRoomIds){
+	return function(req){
+		console.log("Update vehicles location...");
+		for (var i = vehicleRoomIds.length; i > 0; i--) {
+			
+			Vehicle.update({name:i},{$set:{'location.longitude':(Math.random() * (21.120 - 24.0200) + 24.0200).toFixed(5)}}, function(err){
+				if(err){
+					//if it failed, return error
+					console.log("There was a problem adding the information to the database.");
+					console.log(err)
+				}
+				else{
+					// console.log(result);
+				}
+			});
+			Vehicle.update({name:i},{$set:{'location.latitude':(Math.random() * (39.120 - 35.0200) + 35.0200).toFixed(5)}}, function(err){
+				if(err){
+					//if it failed, return error
+					console.log("There was a problem adding the information to the database.");
+					console.log(err)
+				}
+				else{
+					// console.log(result);
+				}
+			});
+		}
+	}
+}

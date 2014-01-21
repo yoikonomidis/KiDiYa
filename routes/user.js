@@ -1,6 +1,6 @@
 /*	################					################
  	################	KiDiYa Project	################
-	################	----2013----	################
+	################	----2014----	################
 	################					################
 */
 var User = require('../models/user.js');
@@ -9,9 +9,6 @@ var User = require('../models/user.js');
 // If login is successful, redirects to the home page
 exports.userLogin = function(db){
 	return function(req, res, next){
-		// var collection = db.get('userCollection');
-  // 		var user = req.body;
-  // 		collection.find({"user.name" : user.user.name, "user.password" : user.user.password}, function(err,fetchedUser){
 		User.find({name : req.body.name, password : req.body.password}, function(err,fetchedUser){
 			if(err){
 				//if it failed, return error

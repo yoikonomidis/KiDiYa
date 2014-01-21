@@ -1,6 +1,8 @@
-// var User = require('../models/user.js');
-// var Vehicle = require('../models/vehicle.js');
-// var Pair = require('../models/pair.js');
+/*	################					################
+ 	################	KiDiYa Project	################
+	################	----2014----	################
+	################					################
+*/
 
 // Return Home page
 exports.index = function(req, res){

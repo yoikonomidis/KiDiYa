@@ -1,30 +1,26 @@
 /*	################					################
 	################	KiDiYa Project	################
-	################	----2013----	################
+	################	----2014----	################
 	################					################
 */
 
 /**
  * Module dependencies.
  */
-var express = require('express');
+var express = require('express.io');
+var http = require('http');
+var path = require('path');
+var mongoose = require('mongoose');
 var routes = require('./routes');
 var user = require('./routes/user.js');
 var vehicle = require('./routes/vehicle.js');
 var vupair = require('./routes/vupair.js');
 var utils = require('./routes/utils.js');
-var http = require('http');
-var path = require('path');
-var mongoose = require('mongoose');
-
-// //Connect to MongoDB
-// var mongo = require('mongodb');
-// var monk = require('monk');
-// var db = monk('localhost:27017/nodetest1');
+var fs = require('fs');
 
 // connect to Mongo when the app initializes
 var db = mongoose.connect('mongodb://localhost:27017/nodetest1');
-var app = express();
+var app = express().http().io();
 
 // all environments
 app.set('port', process.env.PORT || 3000); // Whatever is in the environment variable PORT, or 3000 if there's nothing there
@@ -35,8 +31,8 @@ app.use(express.logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
-app.use(express.cookieParser('your secret here'));
-app.use(express.session());
+// app.use(express.cookieParser('your secret here'));
+// app.use(express.session());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -52,33 +48,41 @@ var development = true;
 app.post('/userLogin', user.userLogin(db), routes.index);
 app.get('/userLogout', user.userLogout(db), routes.index);
 app.get('/', user.checkAuthUser(db, development), routes.index);
-
+app.get('/map',user.checkAuthUser(db, development), utils.map(fs));
 app.get('/userList',  user.checkAuthUser(db, development), user.userList(db));
 app.get('/userListMobile',  user.checkAuthUser(db, development), user.userListMobile(db));
-// app.get('/newUser', routes.newUser);
-// app.get('/deleteUser',  routes.checkAuthUser(db), routes.deleteUser);
 app.post('/addUser', user.addUser(db), user.userList(db));
 app.post('/removeUser', user.removeUser(db),user.userList(db));
-
 app.get('/vehicleList',  user.checkAuthUser(db, development), vehicle.vehicleList(db));
 app.get('/vehicleListMobile',  user.checkAuthUser(db, development), vehicle.vehicleListMobile(db));
-// app.get('/newVehicle', routes.newVehicle);
-// app.get('/deleteVehicle',  routes.checkAuthUser(db), routes.deleteVehicle);
 app.post('/addVehicle', vehicle.addVehicle(db), vehicle.vehicleList(db));
 app.post('/removeVehicle', vehicle.removeVehicle(db),vehicle.vehicleList(db));
 app.post('/reserveVehicle', vehicle.reserveVehicle(db), vehicle.vehicleList(db));
-
 app.get('/vuPairList',  user.checkAuthUser(db, development), vupair.vuPairList(db));
 app.get('/vuPairListMobile',  user.checkAuthUser(db, development), vupair.vuPairListMobile(db));
 app.post('/addVUPair', vupair.addVUPair(db));
 app.post('/removeVUPair', vupair.removeVUPair(db));
-
 app.post('/updateUserLocation',user.updateUserLocation(db), user.userListMobile(db));
 app.post('/updateVehicleLocation',vehicle.updateVehicleLocation(db), vehicle.vehicleListMobile(db));
 app.get('/cleanDatabase', utils.cleanDatabase(db));
 
-http.createServer(app).listen(app.get('port'), function(){
+app.io.route('getVehicleLocation', vehicle.getVehicleLocation(db))
+
+// The array containing all the vehicle ids  which also serve as express.io room identifiers
+var vehicleRoomIds = [ 	"1",
+						"2",
+						"3"
+						]
+
+// Broadcast the vehicles location to the registered users
+// TODO: instead of periodically sending the information, send it on database update events
+setInterval(vehicle.broadcastVehiclesLocation(app, db, vehicleRoomIds), 10000);
+
+// Update database with random vehicles location - Simulate vehicle movement when in Development MODE
+if(development){
+	setInterval(vehicle.dummyUpdateVehiclesLocation(app, db, vehicleRoomIds), 10000);
+}
+
+app.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
-
-
