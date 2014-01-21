@@ -35,126 +35,60 @@
 				geocoder = new google.maps.Geocoder();
 				var latlng = new google.maps.LatLng(52.0236377,4.3533367);
 				var mapOptions = {
-					zoom: 18,
+					zoom: 4,
 					center: latlng,
 					mapTypeId: 'roadmap'
 				}
 				map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 			}
 
-			function codeLatLngAjax() {
-				var lat;
-				var lng;
-				var latlng;
-				var ajaxVehicleName = document.getElementById('ajaxVehicleName').value;
-
-				$(document).ready(function(){
-					$.ajax({
-	 					url: 'http://localhost:3000/getVehicleLocationAjax',
-						type: 'GET',
-						dataType: 'json',
-						data: {"name": ajaxVehicleName},
-						error: function(xhr,status, error){
-							console.log(status);
-						},
-						success: function (result) {
-							console.log(result);
-							lat = result[0].location.latitude;
-	 						lng = result[0].location.longitude;
-							latlng = new google.maps.LatLng(lat, lng);
-							geocoder.geocode({'latLng': latlng}, function(results, status) {
-	          					if (status == google.maps.GeocoderStatus.OK) {
-									if (results[1]) {
-										map.setZoom(18);
-										marker = new google.maps.Marker({
-											position: latlng,
-											map: map
-										});
-										infowindow.setContent(results[1].formatted_address);
-										infowindow.open(map, marker);
-									} 
-									else {
-										alert('No results found');
-									}
-								}
-								else {
-									alert('Geocoder failed due to: ' + status);
-								}
-							});
-						}
-					});
-				});
-			}
 			google.maps.event.addDomListener(window, 'load', initialize);
 		</script>
-		<script>
-			// //if io.connect is moved in the function, the connection breaks after use.
-			// io = io.connect();
-   //  		function codeLatLngSocket(){
-   //  			var lat;
-			// 	var lng;
-			// 	var latlng;
-   //  			var socketVehicleName = document.getElementById('socketVehicleName').value;
-   //  			$(document).ready(function(){
-			// 		console.log("CLIENT");
-   //  				io.emit('getVehicleLocation2',{name: socketVehicleName});
-   //  				io.on('talk', function(data){
-   //  					console.log(data);
-   //  					lat = data[0].location.latitude;
-   //  					lng = data[0].location.longitude;
-   //  					latlng = new google.maps.LatLng(lat, lng);
-			// 				geocoder.geocode({'latLng': latlng}, function(results, status) {
-	  //         					if (status == google.maps.GeocoderStatus.OK) {
-			// 						if (results[1]) {
-			// 							map.setZoom(18);
-			// 							marker = new google.maps.Marker({
-			// 								position: latlng,
-			// 								map: map
-			// 							});
-			// 							infowindow.setContent(results[1].formatted_address);
-			// 							infowindow.open(map, marker);
-			// 						} 
-			// 						else {
-			// 							alert('No results found');
-			// 						}
-			// 					}
-			// 					else {
-			// 						alert('Geocoder failed due to: ' + status);
-			// 					}
-			// 				});
-   //  					console.log(data[0].location.latitude);
-   //  					console.log(data[0].location.longitude);
-   //  				});	
-   //  			});
-   //  		}
-   //  		google.maps.event.addDomListener(window, 'load', initialize);
-     	</script>
 
      	<script>
      		io = io.connect();
-     		// room = prompt('type a room name');
-     		var socketVehicleName = [1, 2, 3];
-			// Emit ready event with room name.
-			io.emit('getVehicleLocation', socketVehicleName);
+     		
+     		// TODO: Get the vehicle identification from a GUI
+     		var arrayVehicles = [1, 2, 3];
+     		
+     		// Initialize the marker's array
+     		var markersArray = [];
+     		for(i=0; i<arrayVehicles.length; i++){
+				markersArray[i] = new google.maps.Marker({
+					map: map
+				});
+     		}
 
-			// Listen for the announce event.
-			io.on('talk', function(data){
+			// Emit ready event with room name.
+			io.emit('getVehicleLocation', arrayVehicles);
+
+			// Listen for the location update event.
+			io.on('talk', myEvtHandler.bind(null, io, markersArray, arrayVehicles));
+
+			// This function is used so as to pass parameters in the listener's callback
+			function myEvtHandler(io, markersArray, arrayVehicles, data){
 				console.log(data);
     			lat = data[0].location.latitude;
     			lng = data[0].location.longitude;
+    			console.log(data[0].location.latitude);
+    			console.log(data[0].location.longitude);
+
     			latlng = new google.maps.LatLng(lat, lng);
 
-    			var newMarker = new google.maps.Marker({
-					position: latlng,
+    			// Find the index of the received vehicle's identification in the vehicles' array
+    			var index = arrayVehicles.indexOf(parseInt(data[0].name));
+
+    			// TODO: Investigate if there is a better way to update a marker's location instead of deleting it and create a new one in the array
+    			markersArray[index].setMap(null);
+    			markersArray[index] = null;
+    			markersArray[index] = new google.maps.Marker({
+    				position: latlng,
 					map: map
 				});
-
-				console.log(data[0].location.latitude);
-    			console.log(data[0].location.longitude);
-			});
+			};
     					
 							// geocoder.geocode({'latLng': latlng}, function(results, status) {
-	      //     					if (status == google.maps.GeocoderStatus.OK) {
+	      					// 		if (status == google.maps.GeocoderStatus.OK) {
 							// 		if (results[1]) {
 							// 			map.setZoom(18);
 										
@@ -169,9 +103,7 @@
 							// 	else {
 							// 		alert('Geocoder failed due to: ' + status);
 							// 	}
-							// });
-    					
-    				
+							// });  				
      	</script>
 
 		<style>
@@ -193,12 +125,12 @@
 	</head>
 
 	<body>
-		<div id="panel">
+		<!-- <div id="panel">
 			<input id="ajaxVehicleName" type="text" value="1">
 			<input type="button" value="AJAX: Vehicle ID " onclick="codeLatLngAjax()">
 	    	<input id="socketVehicleName" type="text" value="1">
 			<input type="button" value="SOCKET: Vehicle ID " onclick="codeLatLngSocket()">
-	    </div>
+	    </div> -->
 	    <div id="map-canvas"></div>
 	</body>
 </html>

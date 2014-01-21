@@ -31,7 +31,6 @@ app.use(express.logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
-
 // app.use(express.cookieParser('your secret here'));
 // app.use(express.session());
 app.use(app.router);
@@ -46,13 +45,6 @@ var development = true;
 // }
 
 // Order matters! Nodejs will match the incoming request to the first
-// app.io.route('ready', function(req) {
-// 	console.log("IO received");
-//     req.io.emit('talk', {
-//         message: 'io event from an io route on the server'
-//     });
-// });
-
 app.post('/userLogin', user.userLogin(db), routes.index);
 app.get('/userLogout', user.userLogout(db), routes.index);
 app.get('/', user.checkAuthUser(db, development), routes.index);
@@ -66,21 +58,15 @@ app.get('/vehicleListMobile',  user.checkAuthUser(db, development), vehicle.vehi
 app.post('/addVehicle', vehicle.addVehicle(db), vehicle.vehicleList(db));
 app.post('/removeVehicle', vehicle.removeVehicle(db),vehicle.vehicleList(db));
 app.post('/reserveVehicle', vehicle.reserveVehicle(db), vehicle.vehicleList(db));
-app.get('/getVehicleLocationAjax', vehicle.getVehicleLocationAjax(db));
-// app.get('/getVehicleLocationSocket', vehicle.getVehicleLocationSocket(db));
-
 app.get('/vuPairList',  user.checkAuthUser(db, development), vupair.vuPairList(db));
 app.get('/vuPairListMobile',  user.checkAuthUser(db, development), vupair.vuPairListMobile(db));
 app.post('/addVUPair', vupair.addVUPair(db));
 app.post('/removeVUPair', vupair.removeVUPair(db));
-
 app.post('/updateUserLocation',user.updateUserLocation(db), user.userListMobile(db));
 app.post('/updateVehicleLocation',vehicle.updateVehicleLocation(db), vehicle.vehicleListMobile(db));
 app.get('/cleanDatabase', utils.cleanDatabase(db));
 
 app.io.route('getVehicleLocation', vehicle.getVehicleLocation(db))
-// app.io.route('getVehicleLocation2', vehicle.getVehicleLocationSocket(db));
-	// io.emit('talk',vehicle.getVehicleLocationSocket(db));
 
 // The array containing all the vehicle ids  which also serve as express.io room identifiers
 var vehicleRoomIds = [ 	"1",
@@ -92,9 +78,10 @@ var vehicleRoomIds = [ 	"1",
 // TODO: instead of periodically sending the information, send it on database update events
 setInterval(vehicle.broadcastVehiclesLocation(app, db, vehicleRoomIds), 10000);
 
-// Update database with dummy vehicles location - Simulate vehicle movement
-// TODO: update database using client side on vehicles
-setInterval(vehicle.dummyUpdateVehiclesLocation(app, db, vehicleRoomIds), 10000);
+// Update database with random vehicles location - Simulate vehicle movement when in Development MODE
+if(development){
+	setInterval(vehicle.dummyUpdateVehiclesLocation(app, db, vehicleRoomIds), 10000);
+}
 
 app.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
