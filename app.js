@@ -133,10 +133,19 @@ app.get('/vuPairListMobile',  user.checkAuthUser(db, development), vupair.vuPair
 app.post('/addVUPair', vupair.addVUPair(db));
 app.post('/removeVUPair', vupair.removeVUPair(db));
 app.post('/updateUserLocation',user.updateUserLocation(db), user.userListMobile(db));
-app.post('/updateVehicleLocation',vehicle.updateVehicleLocation(db), vehicle.vehicleListMobile(db));
+app.post('/updateVehicleLocation',vehicle.updateVehicleLocation(app, db), vehicle.broadcastVehiclesLocation(app, db));
 app.get('/cleanDatabase', utils.cleanDatabase(db));
 
-app.io.route('getVehicleLocation', vehicle.getVehicleLocation(db))
+app.io.route('getVehicleLocation', vehicle.getVehicleLocation(app, db, vehicle));
+
+// app.io.route('hello', function(){
+// 	console.logger("Device Connected");
+// });
+
+// app.io.on('hello', function(){
+// 	console.log("Device Connected");
+// });
+
 
 // The array containing all the vehicle ids  which also serve as express.io room identifiers
 var vehicleRoomIds = [ 	"1",
@@ -146,11 +155,11 @@ var vehicleRoomIds = [ 	"1",
 
 // Broadcast the vehicles location to the registered users
 // TODO: instead of periodically sending the information, send it on database update events
-setInterval(vehicle.broadcastVehiclesLocation(app, db, vehicleRoomIds), 10000);
+// setInterval(vehicle.broadcastVehiclesLocation(app, db, vehicleRoomIds), 10000);
 
 // Update database with random vehicles location - Simulate vehicle movement when in Development MODE
 if(development){
-	setInterval(vehicle.dummyUpdateVehiclesLocation(app, db, vehicleRoomIds), 10000);
+	// setInterval(vehicle.dummyUpdateVehiclesLocation(app, db, vehicleRoomIds), 10000);
 }
 
 app.listen(app.get('port'), function(){
@@ -167,7 +176,7 @@ process.on('SIGINT', function() {
 // Catch uncaught exceptions and terminate the program
 process.on('uncaughtException', function (err) {
 	console.error('An uncaughtException was found, the program will end.');
-	console.logger(err);
+	console.log(err);
 	// Do some logging.
 	process.exit(1);
 });

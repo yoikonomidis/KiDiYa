@@ -47,44 +47,47 @@
 
      	<script>
      		io = io.connect();
-     		
+
      		// TODO: Get the vehicle identification from a GUI
      		var arrayVehicles = [1, 2, 3];
-     		
-     		// Initialize the marker's array
-     		var markersArray = [];
-     		for(i=0; i<arrayVehicles.length; i++){
-				markersArray[i] = new google.maps.Marker({
-					map: map
-				});
-     		}
+     		var markersHashMap = {};
+     		// Initialize the marker's hashMap
+     		for (var i = 0; i < arrayVehicles.length; i++) {
+     			if(!(i.toString in markersHashMap))
+     				markersHashMap[arrayVehicles[i].toString()] = {};
+     		};
 
 			// Emit ready event with room name.
 			io.emit('getVehicleLocation', arrayVehicles);
 
 			// Listen for the location update event.
-			io.on('talk', myEvtHandler.bind(null, io, markersArray, arrayVehicles));
+			io.on('vehicleInfo', myEvtHandler.bind(null, io, markersHashMap));
 
 			// This function is used so as to pass parameters in the listener's callback
-			function myEvtHandler(io, markersArray, arrayVehicles, data){
+			function myEvtHandler(io, markersHashMap, data){
 				console.log(data);
-    			lat = data[0].location.latitude;
-    			lng = data[0].location.longitude;
-    			console.log(data[0].location.latitude);
-    			console.log(data[0].location.longitude);
+				for(var i=0; i<data.length; i++){
+    				lat = data[i].location.latitude;
+    				lng = data[i].location.longitude;
+    				console.log(data[i].location.latitude);
+    				console.log(data[i].location.longitude);
 
-    			latlng = new google.maps.LatLng(lat, lng);
+    				latlng = new google.maps.LatLng(lat, lng);
 
-    			// Find the index of the received vehicle's identification in the vehicles' array
-    			var index = arrayVehicles.indexOf(parseInt(data[0].name));
-
-    			// TODO: Investigate if there is a better way to update a marker's location instead of deleting it and create a new one in the array
-    			markersArray[index].setMap(null);
-    			markersArray[index] = null;
-    			markersArray[index] = new google.maps.Marker({
-    				position: latlng,
-					map: map
-				});
+    				// Find the index of the received vehicle's identification in the vehicles' array
+    				var indexName = data[i].name;
+    				var indexId = data[i].id;
+    				
+    				// TODO: Investigate if there is a better way to update a marker's location instead of deleting it and create a new one in the array
+    				if(markersHashMap[indexName][indexId] != null){
+    					markersHashMap[indexName][indexId].setMap(null);
+    					markersHashMap[indexName][indexId] = null;
+    				}
+    				markersHashMap[indexName][indexId] = new google.maps.Marker({
+    					position: latlng,
+						map: map
+					});
+				}
 			};
     					
 							// geocoder.geocode({'latLng': latlng}, function(results, status) {
