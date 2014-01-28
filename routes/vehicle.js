@@ -141,11 +141,11 @@ exports.getVehicleLocation = function(app, db, vehicle){
 }
 
 // Initialize vehicles locations on users map
-exports.initializeVehiclesLocation = function(app, db, req){
+exports.initializeVehiclesLocation = function(app, db, vehicleName){
 	
 		console.logger("Initialize vehicles location...");
 
-		Vehicle.find({name:req}, {id:1, name:1, location:1}, function(err, result){
+		Vehicle.find({name:vehicleName}, {id:1, name:1, location:1}, function(err, result){
 			if(err){
 				//if it failed, return error
 				console.logger(err);
@@ -153,7 +153,7 @@ exports.initializeVehiclesLocation = function(app, db, req){
 			}
 			else{
 				// console.log(result);
-				app.io.room(req).broadcast('vehicleInfo', result);	
+				app.io.room(vehicleName).broadcast('vehicleInfo', result);	
 			}
 		});
 	

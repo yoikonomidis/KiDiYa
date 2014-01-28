@@ -126,14 +126,14 @@ app.post('/removeUser', user.removeUser(db),user.userList(db));
 app.get('/vehicleList',  user.checkAuthUser(db, development), vehicle.vehicleList(db));
 app.get('/vehicleListMobile',  user.checkAuthUser(db, development), vehicle.vehicleListMobile(db));
 app.post('/addVehicle', vehicle.addVehicle(db), vehicle.vehicleList(db));
-app.post('/removeVehicle', vehicle.removeVehicle(db),vehicle.vehicleList(db));
+app.post('/removeVehicle', vehicle.removeVehicle(db), vehicle.vehicleList(db));
 app.post('/reserveVehicle', vehicle.reserveVehicle(db), vehicle.vehicleList(db));
 app.get('/vuPairList',  user.checkAuthUser(db, development), vupair.vuPairList(db));
 app.get('/vuPairListMobile',  user.checkAuthUser(db, development), vupair.vuPairListMobile(db));
 app.post('/addVUPair', vupair.addVUPair(db));
 app.post('/removeVUPair', vupair.removeVUPair(db));
-app.post('/updateUserLocation',user.updateUserLocation(db), user.userListMobile(db));
-app.post('/updateVehicleLocation',vehicle.updateVehicleLocation(app, db), vehicle.broadcastVehiclesLocation(app, db));
+app.post('/updateUserLocation', user.updateUserLocation(db), user.userListMobile(db));
+app.post('/updateVehicleLocation', vehicle.updateVehicleLocation(app, db), vehicle.broadcastVehiclesLocation(app, db));
 app.get('/cleanDatabase', utils.cleanDatabase(db));
 
 app.io.route('getVehicleLocation', vehicle.getVehicleLocation(app, db, vehicle));
