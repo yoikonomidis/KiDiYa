@@ -138,13 +138,9 @@ app.get('/cleanDatabase', utils.cleanDatabase(db));
 
 app.io.route('getVehicleLocation', vehicle.getVehicleLocation(app, db, vehicle));
 
-// app.io.route('hello', function(){
-// 	console.logger("Device Connected");
-// });
-
-// app.io.on('hello', function(){
-// 	console.log("Device Connected");
-// });
+app.io.route('hello', function(){
+		console.logger("Device Connected");
+});
 
 
 // The array containing all the vehicle ids  which also serve as express.io room identifiers
