@@ -23,48 +23,109 @@
 		</style>
 		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-		<script src="http://localhost:3000/socket.io/socket.io.js"></script>
-		<script>
+		<script src="http://84.80.46.156:3000/socket.io/socket.io.js"></script>
+
+    	<script>
+		// Note: This example requires that you consent to location sharing when
+		// prompted by your browser. If you see a blank space instead of the map, this
+		// is probably because you have denied permission for location sharing.
 			var geocoder;
 			var map;
-			var infowindow = new google.maps.InfoWindow();
-			// var marker = new google.maps.Marker();
-			// var marker;
-			
+
 			function initialize() {
 				geocoder = new google.maps.Geocoder();
-				var latlng = new google.maps.LatLng(52.0236377,4.3533367);
-				var mapOptions = {
-					zoom: 4,
-					center: latlng,
+			  	var mapOptions = {
+			    	zoom: 15,
 					mapTypeId: 'roadmap'
+				};
+			  	map = new google.maps.Map(document.getElementById('map-canvas'),mapOptions);
+
+			  	// Try HTML5 geolocation
+				if(navigator.geolocation) {
+					navigator.geolocation.getCurrentPosition(function(position) {
+						//change this line for developers mode
+			    		// var pos = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
+			    		var pos = new google.maps.LatLng(37.96263038617284,23.667490473818173);
+			    		map.setCenter(pos);
+			    	}, function() {
+			      		handleNoGeolocation(true);
+			    	});
+			  	} else {
+			    	// Browser doesn't support Geolocation
+			    	handleNoGeolocation(false);
+			  	}
+			}
+
+			function handleNoGeolocation(errorFlag) {
+				if (errorFlag) {
+					var content = 'Error: The Geolocation service failed.';
+				} else {
+			    	var content = 'Error: Your browser doesn\'t support geolocation.';
 				}
-				map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+				var options = {
+					map: map,
+			    	position: new google.maps.LatLng(60, 105),
+			    	content: content
+			  	};
+				map.setCenter(options.position);
 			}
 
 			google.maps.event.addDomListener(window, 'load', initialize);
-		</script>
 
+	    </script>
      	<script>
      		io = io.connect();
+     		var stationInfo = new google.maps.InfoWindow();
 
      		// TODO: Get the vehicle identification from a GUI
      		var arrayVehicles = [220, 222, 235];
-     		var markersHashMap = {};
-     		// Initialize the marker's hashMap
+     		var marker;
+     		var busHashMap = {};
+     		// Initialize the bus marker's hashMap
      		for (var i = 0; i < arrayVehicles.length; i++) {
-     			if(!(i.toString in markersHashMap))
-     				markersHashMap[arrayVehicles[i].toString()] = {};
+     			if(!(i.toString in busHashMap))
+     				busHashMap[arrayVehicles[i].toString()] = {};
      		};
+
+     		// Emit ready event to get stations
+     		io.emit('getStations');
+			io.on('stationInfo', StationEvtHandler.bind(null));
+			function StationEvtHandler(data){
+				for(var i=0; i<data.length; i++){
+					lng = data[i].geometry.coordinates[0];
+					lat = data[i].geometry.coordinates[1];
+    				latlng = new google.maps.LatLng(lat, lng);
+					marker = new google.maps.Marker({
+				    	position: latlng,
+						map: map
+					});
+					
+ 					google.maps.event.addListener(marker, 'click', (function(marker, i) {
+        				return function() {
+        					stationInfo.setContent(data[i].properties.name);
+        					stationInfo.open(map, marker);
+        				}
+      				})(marker, i));
+					
+					iconFile = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'; 
+					marker.setIcon(iconFile)
+				}
+			}
+			function listenMarker (marker){
+    			// Listener is put on a different function to create a "closure" around the marker.
+			    google.maps.event.addListener(marker, 'click', function() {
+                    stationInfo.open(map, marker);
+                });
+			}
 
 			// Emit ready event with room name.
 			io.emit('getVehicleLocation', arrayVehicles);
-
 			// Listen for the location update event.
-			io.on('vehicleInfo', myEvtHandler.bind(null, io, markersHashMap));
+			io.on('vehicleInfo', myEvtHandler.bind(null, io, busHashMap));
 
 			// This function is used so as to pass parameters in the listener's callback
-			function myEvtHandler(io, markersHashMap, data){
+			function myEvtHandler(io, busHashMap, data){
 				console.log(data);
 				for(var i=0; i<data.length; i++){
     				lat = data[i].location.latitude;
@@ -79,34 +140,16 @@
     				var indexId = data[i].id;
     				
     				// TODO: Investigate if there is a better way to update a marker's location instead of deleting it and create a new one in the array
-    				if(markersHashMap[indexName][indexId] != null){
-    					markersHashMap[indexName][indexId].setMap(null);
-    					markersHashMap[indexName][indexId] = null;
+    				if(busHashMap[indexName][indexId] != null){
+    					busHashMap[indexName][indexId].setMap(null);
+    					busHashMap[indexName][indexId] = null;
     				}
-    				markersHashMap[indexName][indexId] = new google.maps.Marker({
+    				busHashMap[indexName][indexId] = new google.maps.Marker({
     					position: latlng,
 						map: map
 					});
 				}
 			};
-    					
-							// geocoder.geocode({'latLng': latlng}, function(results, status) {
-	      					// 		if (status == google.maps.GeocoderStatus.OK) {
-							// 		if (results[1]) {
-							// 			map.setZoom(18);
-										
-							// 			// newMarker.setMap(map);
-							// 			// infowindow.setContent(results[1].formatted_address);
-							// 			// infowindow.open(map, newMarker);
-							// 		} 
-							// 		else {
-							// 			alert('No results found');
-							// 		}
-							// 	}
-							// 	else {
-							// 		alert('Geocoder failed due to: ' + status);
-							// 	}
-							// });  				
      	</script>
 
 		<style>

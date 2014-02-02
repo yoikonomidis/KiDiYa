@@ -141,6 +141,7 @@ app.post('/updateVehicleLocation', vehicle.updateVehicleLocationREST(app, db, ve
 //################ SOCKET API ################
 app.io.route('updateVehicleLocation', vehicle.updateVehicleLocation(app, db, vehicle));
 app.io.route('getVehicleLocation', vehicle.getVehicleLocation(app, db, vehicle));
+app.io.route('getStations', vehicle.getStations(app, db, vehicle));
 
 // The array containing all the vehicle ids  which also serve as express.io room identifiers
 // var vehicleRoomIds = [ 	"220",
