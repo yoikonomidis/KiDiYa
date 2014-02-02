@@ -134,7 +134,8 @@ app.post('/addVUPair', vupair.addVUPair(db));
 app.post('/removeVUPair', vupair.removeVUPair(db));
 app.post('/updateUserLocation', user.updateUserLocation(db), user.userListMobile(db));
 app.post('/updateVehicleLocation', vehicle.updateVehicleLocation(app, db), vehicle.broadcastVehiclesLocation(app, db));
-app.get('/cleanDatabase', utils.cleanDatabase(db));
+// app.get('/cleanDatabase', utils.cleanDatabase(db));
+app.get('/populateVehicleCollection', vehicle.populateVehicleCollection(db),routes.index);
 
 app.io.route('getVehicleLocation', vehicle.getVehicleLocation(app, db, vehicle));
 
@@ -144,18 +145,18 @@ app.io.route('hello', function(){
 
 
 // The array containing all the vehicle ids  which also serve as express.io room identifiers
-var vehicleRoomIds = [ 	"1",
-						"2",
-						"3"
+var vehicleRoomIds = [ 	"220",
+						"222",
+						"235"
 						]
 
 // Broadcast the vehicles location to the registered users
 // TODO: instead of periodically sending the information, send it on database update events
-// setInterval(vehicle.broadcastVehiclesLocation(app, db, vehicleRoomIds), 10000);
+setInterval(vehicle.broadcastVehiclesLocation(app, db, vehicleRoomIds), 1000);
 
 // Update database with random vehicles location - Simulate vehicle movement when in Development MODE
 if(development){
-	// setInterval(vehicle.dummyUpdateVehiclesLocation(app, db, vehicleRoomIds), 10000);
+	setInterval(vehicle.dummyUpdateVehiclesLocation(app, db, vehicleRoomIds), 1000);
 }
 
 app.listen(app.get('port'), function(){
