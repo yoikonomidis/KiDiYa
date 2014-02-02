@@ -116,8 +116,8 @@ exports.reserveVehicle = function(db){
 
 // Updates a vehicle's location in the database
 exports.updateVehicleLocation = function(app, db, vehicle){
-	return function(req, res, next){
-		Vehicle.update({id:req.body.id}, {$set:{location:req.body.location}}, function(err){
+	return function(req){
+		Vehicle.update({id:req.data.id}, {$set:{location:req.data.location}}, function(err){
 			if(err){
 				//if it failed, return error
 				res.send("There was a problem adding the information to the database.");
@@ -130,9 +130,46 @@ exports.updateVehicleLocation = function(app, db, vehicle){
 	}
 }
 
-// Broadcast the received updated location of a vehicle to the registered users
+// TODO: Remove duplicate - merge with Socket-based
+// Updates a vehicle's location in the database - REST
+exports.updateVehicleLocationREST = function(app, db, vehicle){
+	return function(req, res, next){
+		Vehicle.update({id:req.body.id}, {$set:{location:req.body.location}}, function(err){
+			if(err){
+				//if it failed, return error
+				res.send("There was a problem adding the information to the database.");
+			}
+			else{
+				next(); // This is for the rest API
+			}
+		}); 
+	}
+}
+
+// Broadcast the received updated location of a vehicle to the registered users - Socket
 exports.broadcastVehiclesLocation = function(app, db, req){
 	// return function(req){ // This is necessarry when this function is used as a callback in a REST routing scheme
+		console.logger("Broadcast vehicles location...");
+
+		Vehicle.find({id:req.data.id}, {id:1, name:1, location:1}, function(err, result){
+
+			if(err){
+				//if it failed, return error
+				console.logger(err);
+				// res.send("There was a problem getting the data from the database.");
+			}
+			else{
+				// console.log(result);
+				app.io.room(req.data.name).broadcast('vehicleInfo', result);	
+			}
+		});
+	// }
+}
+
+// TODO: Remove duplicate - merge with Socket-based
+// Broadcast the received updated location of a vehicle to the registered users - REST
+exports.broadcastVehiclesLocationREST = function(app, db){
+	return function(req){ // This is necessarry when this function is used as a callback in a REST routing scheme
 		console.logger("Broadcast vehicles location...");
 
 		Vehicle.find({id:req.body.id}, {id:1, name:1, location:1}, function(err, result){
@@ -144,10 +181,10 @@ exports.broadcastVehiclesLocation = function(app, db, req){
 			}
 			else{
 				// console.log(result);
-				app.io.room(vehicleName).broadcast('vehicleInfo', result);	
+				app.io.room(req.body.name).broadcast('vehicleInfo', result);	
 			}
 		});
-	// }
+	}
 }
 
 //Periodically broadcast vehicles' location

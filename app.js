@@ -136,7 +136,7 @@ app.post('/addVUPair', vupair.addVUPair(db));
 app.post('/removeVUPair', vupair.removeVUPair(db));
 app.post('/updateUserLocation', user.updateUserLocation(db), user.userListMobile(db));
 app.get('/populateVehicleCollection', vehicle.populateVehicleCollection(db),routes.index);
-app.post('/updateVehicleLocation', vehicle.updateVehicleLocation(app, db, vehicle));// TODO: When the client side is ready, comment this line out
+app.post('/updateVehicleLocation', vehicle.updateVehicleLocationREST(app, db, vehicle), vehicle.broadcastVehiclesLocationREST(app, db));
 
 //################ SOCKET API ################
 app.io.route('updateVehicleLocation', vehicle.updateVehicleLocation(app, db, vehicle));
