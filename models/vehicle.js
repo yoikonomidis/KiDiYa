@@ -6,17 +6,22 @@
 
 var mongoose = require( 'mongoose' );
 var Schema   = mongoose.Schema;
-
-var vehicleSchema = new Schema({
-	id:Number,
-	name:String,
-	location:
+//I=id N=name L=location H=horizontal(longitude) V=vertical(latitude)
+var vehicleSchema = new Schema(
 	{
-		longitude:Number,
-		latitude:Number
+		_id:Number,
+		N:String,
+		L:
+		{
+			H:Number,
+			V:Number
+		}
 	}
-});
-
+	// ,
+	// {
+	// 	_id:false
+	// }
+);
 
 //Method for cleaning the vehicles colection. It may be redundant!
 vehicleSchema.methods.cleanAll = function (cb) {

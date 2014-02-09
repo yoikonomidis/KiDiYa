@@ -48,7 +48,7 @@ exports.addVehicle = function(db){
 // Updates a vehicle's information in the database
 exports.updateVehicleInfo = function(db){
 	return function(req, res, next){
-		Vehicle.update({id:req.body.id}, {$set:{name:req.body.name}}, {upsert: true}, function(err){
+		Vehicle.update({_id:req.body._id}, {$set:{N:req.body.N}}, {upsert: true}, function(err){
 			if(err){
 				//if it failed, return error
 				res.send("There was a problem updating the information to the database.");
@@ -67,7 +67,7 @@ exports.deleteVehicle = function(req, res){
 // Removes a vehicle from the vehicle list
 exports.removeVehicle = function(db){
 	return function(req,res, next){
-		Vehicle.find({id:req.body.id}).remove(function(err,userList){
+		Vehicle.find({_id:req.body._id}).remove(function(err,userList){
 			if(err){
 				//if it failed, return error
 				res.send("There was a problem removing the user from the database.");
@@ -87,25 +87,25 @@ exports.reserveVehicle = function(db){
 	return function(req, res, next){
 
 	  	var collection = db.get('vehicleCollection');
-	  	var id = req.body.vehicle.id;
+	  	var _id = req.body.vehicle._id;
 		
 		// We first unlock the vehicle
-		collection.update({"vehicle.id":id}, {$set:{"vehicle.locked":0}}, function(err, updated){
+		collection.update({"vehicle._id":_id}, {$set:{"vehicle.locked":0}}, function(err, updated){
 		 	if(err){
 		 		//if it failed, return error
 		 		console.logger("There was a problem updating the information to the database.");
 		 	}
 		 	else{
-		 		console.logger("Vehicle with id " + id + " was unlocked " + updated);
+		 		console.logger("Vehicle with id " + _id + " was unlocked " + updated);
 
 		 		// We reserve the vehicle
-		 		collection.update({"vehicle.id":id}, {$set:{"vehicle.reserved":1}}, function(err){
+		 		collection.update({"vehicle._id":_id}, {$set:{"vehicle.reserved":1}}, function(err){
 		 			if(err){
 		 				//if it failed, return error
 		 				res.send("There was a problem updating the information to the database.");
 		 			}
 		 			else{
-		 				console.logger("Vehicle with id " + id + " was reserved");
+		 				console.logger("Vehicle with id " + _id + " was reserved");
 		 				next();
 		 			}
 		 		});
@@ -117,7 +117,7 @@ exports.reserveVehicle = function(db){
 // Updates a vehicle's location in the database
 exports.updateVehicleLocation = function(app, db, vehicle){
 	return function(req){
-		Vehicle.update({id:req.data.id}, {$set:{location:req.data.location}}, function(err){
+		Vehicle.update({_id:req.data._id}, {$set:{L:req.data.L}}, function(err){
 			if(err){
 				//if it failed, return error
 				res.send("There was a problem adding the information to the database.");
@@ -134,7 +134,7 @@ exports.updateVehicleLocation = function(app, db, vehicle){
 // Updates a vehicle's location in the database - REST
 exports.updateVehicleLocationREST = function(app, db, vehicle){
 	return function(req, res, next){
-		Vehicle.update({id:req.body.id}, {$set:{location:req.body.location}}, function(err){
+		Vehicle.update({_id:req.body._id}, {$set:{L:req.body.L}}, function(err){
 			if(err){
 				//if it failed, return error
 				res.send("There was a problem adding the information to the database.");
@@ -151,7 +151,7 @@ exports.broadcastVehiclesLocation = function(app, db, req){
 	// return function(req){ // This is necessarry when this function is used as a callback in a REST routing scheme
 		console.logger("Broadcast vehicles location...");
 
-		Vehicle.find({id:req.data.id}, {id:1, name:1, location:1}, function(err, result){
+		Vehicle.find({_id:req.data._id}, {_id:1, N:1, L:1}, function(err, result){
 
 			if(err){
 				//if it failed, return error
@@ -160,7 +160,7 @@ exports.broadcastVehiclesLocation = function(app, db, req){
 			}
 			else{
 				// console.log(result);
-				app.io.room(req.data.name).broadcast('vehicleInfo', result);	
+				app.io.room(req.data.N).broadcast('vehicleInfo', result);	
 			}
 		});
 	// }
@@ -172,7 +172,7 @@ exports.broadcastVehiclesLocationREST = function(app, db){
 	return function(req){ // This is necessarry when this function is used as a callback in a REST routing scheme
 		console.logger("Broadcast vehicles location...");
 
-		Vehicle.find({id:req.body.id}, {id:1, name:1, location:1}, function(err, result){
+		Vehicle.find({_id:req.body._id}, {_id:1, N:1, L:1}, function(err, result){
 
 			if(err){
 				//if it failed, return error
@@ -181,19 +181,21 @@ exports.broadcastVehiclesLocationREST = function(app, db){
 			}
 			else{
 				// console.log(result);
-				app.io.room(req.body.name).broadcast('vehicleInfo', result);	
+				app.io.room(req.body.N).broadcast('vehicleInfo', result);	
 			}
 		});
 	}
 }
 
-//Periodically broadcast vehicles' location
+// //Periodically broadcast vehicles' location
 // exports.broadcastVehiclesLocation = function(app, db, vehicleRoomIds){
 // 	return function(){
 // 		console.logger("Broadcast vehicles location...");
 
-// 		for (var i = vehicleRoomIds.length; i > 0; i--) {
-// 			Vehicle.find({name:parseInt(vehicleRoomIds[i])},{name:1,location:1}, function(err,result){
+// 		for (var i = vehicleRoomIds.length-1; i >= 0; i--) {
+// 			//NOTE: change commenting to broadcast a single bus
+// 			Vehicle.find({N:parseInt(vehicleRoomIds[i])},{N:1,L:1}, function(err,result){
+// 			// Vehicle.find({_id:1},{N:1,L:1}, function(err,result){
 // 				if(err){
 // 					//if it failed, return error
 // 					console.logger(err);
@@ -201,12 +203,14 @@ exports.broadcastVehiclesLocationREST = function(app, db){
 // 				}
 // 				else{
 // 					// console.log(result);
+// 					//NOTE: change commenting to broadcast a single room
 // 					app.io.room(parseInt(vehicleRoomIds[i])).broadcast('vehicleInfo', result);	
+// 					// app.io.room(parseInt(vehicleRoomIds[0])).broadcast('vehicleInfo', result);
 // 				}
 // 			});
 // 		}
-// 	}
-// }
+//  	}
+//  }
 
 // Register a user to the appropriate rooms so as to send vehicles' location
 exports.getVehicleLocation = function(app, db, vehicle){
@@ -224,7 +228,7 @@ exports.initializeVehiclesLocation = function(app, db, vehicleName){
 	
 		console.logger("Initialize vehicles location...");
 
-		Vehicle.find({name:vehicleName}, {id:1, name:1, location:1}, function(err, result){
+		Vehicle.find({N:vehicleName}, {_id:1, N:1, L:1}, function(err, result){
 			if(err){
 				//if it failed, return error
 				console.logger(err);
@@ -244,8 +248,9 @@ exports.dummyUpdateVehiclesLocation = function(app, db, vehicleRoomIds){
 	return function(req){
 		console.logger("Update vehicles location...");
 		for (var i = vehicleRoomIds.length; i > 0; i--) {
-			
-			Vehicle.update({name:parseInt(vehicleRoomIds[i])},{$set:{'location.longitude':(Math.random() * (21.120 - 24.0200) + 24.0200).toFixed(5)}}, {multi: true}, function(err,result){
+			//NOTE: change commenting to update a single bus
+			Vehicle.update({N:parseInt(vehicleRoomIds[i])},{$set:{'L.H':(Math.random() * (21.120 - 24.0200) + 24.0200).toFixed(5)}}, {multi: true}, function(err,result){
+			// Vehicle.update({_id:1},{$set:{'L.H':(Math.random() * (21.120 - 24.0200) + 24.0200).toFixed(5)}}, {multi: true}, function(err,result){
 				if(err){
 					//if it failed, return error
 					console.logger("There was a problem adding the information to the database.");
@@ -255,7 +260,8 @@ exports.dummyUpdateVehiclesLocation = function(app, db, vehicleRoomIds){
 					// console.log(result);
 				}
 			});
-			Vehicle.update({name:parseInt(vehicleRoomIds[i])},{$set:{'location.latitude':(Math.random() * (39.120 - 35.0200) + 35.0200).toFixed(5)}}, {multi: true}, function(err,result){
+			Vehicle.update({N:parseInt(vehicleRoomIds[i])},{$set:{'L.V':(Math.random() * (39.120 - 35.0200) + 35.0200).toFixed(5)}}, {multi: true}, function(err,result){
+			// Vehicle.update({_id:1},{$set:{'L.V':(Math.random() * (39.120 - 35.0200) + 35.0200).toFixed(5)}}, {multi: true}, function(err,result){
 				if(err){
 					//if it failed, return error
 					console.logger("There was a problem adding the information to the database.");
@@ -276,29 +282,31 @@ exports.populateVehicleCollection = function(db){
 		(new Vehicle).cleanAll(function(err){
 			if(err){
 				//if it failed, return error
-				console.log("Error");
-				res.send("There was a problem updating the information to the database.");
+				console.log("Error_0");
+				// res.send("There was a problem updating the information to the database.");
 			}
 			else{
 				for(var i=0;i<60;i++){
 					if(i<20){
-						var Bus = new Vehicle({id:i, name:"220", location:{longitude:((Math.random() * (21.120 - 24.0200) + 24.0200).toFixed(5)),latitude:((Math.random() * (39.120 - 35.0200) + 35.0200).toFixed(5))}}).save(function(err){
+						var Bus = new Vehicle({_id:i, N:"220", L:{H:((Math.random() * (21.120 - 24.0200) + 24.0200).toFixed(5)),V:((Math.random() * (39.120 - 35.0200) + 35.0200).toFixed(5))}}).save(function(err){
 							if(err){
 							//if it failed, return error
-								console.log("Error");
-								res.send("There was a problem adding the information to the database.");
+								console.log("Error_1");
+								// console.log(Bus);
+								// res.send("There was a problem adding the information to the database.");
 							}
 							else{
 								console.log('Done');
+								// console.log(Bus);
 							}
 						});
 					}
 					if(i>=20 && i<40){
-						var Bus = new Vehicle({id:i, name:"222", location:{longitude:((Math.random() * (21.120 - 24.0200) + 24.0200).toFixed(5)),latitude:((Math.random() * (39.120 - 35.0200) + 35.0200).toFixed(5))}}).save(function(err){
+						var Bus = new Vehicle({_id:i, N:"222", L:{H:((Math.random() * (21.120 - 24.0200) + 24.0200).toFixed(5)),V:((Math.random() * (39.120 - 35.0200) + 35.0200).toFixed(5))}}).save(function(err){
 							if(err){
 							//if it failed, return error
-								console.log("Error");
-								res.send("There was a problem adding the information to the database.");
+								console.log("Error_2");
+								// res.send("There was a problem adding the information to the database.");
 							}
 							else{
 								console.log('Done');
@@ -306,11 +314,11 @@ exports.populateVehicleCollection = function(db){
 						});
 					}
 					if(i >= 40 && i<60){
-						var Bus = new Vehicle({id:i, name:"235", location:{longitude:((Math.random() * (21.120 - 24.0200) + 24.0200).toFixed(5)),latitude:((Math.random() * (39.120 - 35.0200) + 35.0200).toFixed(5))}}).save(function(err){
+						var Bus = new Vehicle({_id:i, N:"235", L:{H:((Math.random() * (21.120 - 24.0200) + 24.0200).toFixed(5)),V:((Math.random() * (39.120 - 35.0200) + 35.0200).toFixed(5))}}).save(function(err){
 							if(err){
 							//if it failed, return error
-								console.log("Error");
-								res.send("There was a problem adding the information to the database.");
+								console.log("Error_3");
+								// res.send("There was a problem adding the information to the database.");
 							}
 							else{
 								console.log('Done');

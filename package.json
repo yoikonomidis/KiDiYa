@@ -9,11 +9,12 @@
     "express": "3.4.5",
     "jade": "*",
     "mongodb": "*",
-    "nodeunit" : "*",
-    "mongoose" : "*",
+    "nodeunit": "*",
+    "mongoose": "*",
     "socket.io": "*",
     "express.io": "*",
-    "posix-getopt" : "*",
-    "moment" : "*"
+    "posix-getopt": "*",
+    "moment": "*",
+    "strong-agent": "~0.2.22"
   }
 }

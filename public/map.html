@@ -67,16 +67,16 @@
 			function myEvtHandler(io, markersHashMap, data){
 				console.log(data);
 				for(var i=0; i<data.length; i++){
-    				lat = data[i].location.latitude;
-    				lng = data[i].location.longitude;
-    				console.log(data[i].location.latitude);
-    				console.log(data[i].location.longitude);
+    				lat = data[i].L.V;
+    				lng = data[i].L.H;
+    				// console.log(data[i].location.latitude);
+    				// console.log(data[i].location.longitude);
 
     				latlng = new google.maps.LatLng(lat, lng);
 
     				// Find the index of the received vehicle's identification in the vehicles' array
-    				var indexName = data[i].name;
-    				var indexId = data[i].id;
+    				var indexName = data[i].N;
+    				var indexId = data[i]._id;
     				
     				// TODO: Investigate if there is a better way to update a marker's location instead of deleting it and create a new one in the array
     				if(markersHashMap[indexName][indexId] != null){
