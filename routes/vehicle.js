@@ -5,6 +5,7 @@
 */
 
 var Vehicle = require('../models/vehicle.js');
+var Station = require('../models/stations.js');
 // Prints the vehicle list on the browser
 exports.vehicleList = function(db){
 	return function(req, res){
@@ -187,6 +188,22 @@ exports.broadcastVehiclesLocationREST = function(app, db){
 	}
 }
 
+
+exports.getStations = function(app, db){
+	return function(req){
+		console.logger("Sending stations")
+		Station.find({},{},function(err,result){
+			if(err){
+				//if it failed, return error
+				console.logger(err);
+			}
+			else{
+				req.io.emit('stationInfo',result);
+			}
+		})
+	}
+}
+
 //Periodically broadcast vehicles' location
 // exports.broadcastVehiclesLocation = function(app, db, vehicleRoomIds){
 // 	return function(){
@@ -268,7 +285,6 @@ exports.dummyUpdateVehiclesLocation = function(app, db, vehicleRoomIds){
 		}
 	}
 }
-
 
 //This function cleans the Vehicle collection and repopulates it with 60 vehicles, 20 in each line.
 exports.populateVehicleCollection = function(db){
