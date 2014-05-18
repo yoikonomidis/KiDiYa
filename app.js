@@ -141,7 +141,18 @@ app.post('/updateVehicleLocation', vehicle.updateVehicleLocationREST(app, db, ve
 //################ SOCKET API ################
 app.io.route('updateVehicleLocation', vehicle.updateVehicleLocation(app, db, vehicle));
 app.io.route('getVehicleLocation', vehicle.getVehicleLocation(app, db, vehicle));
+app.io.route('deregisterVehiclesLocation', vehicle.deregisterVehiclesLocation(app, db, vehicle));
 app.io.route('getStations', vehicle.getStations(app, db, vehicle));
+
+// For development purposes only
+// Test Accelerometer-related messages
+app.io.route('updateAccelerometer', function(){
+	console.logger("Accelerometer");
+});
+
+// For development purposes only
+// Populate stations
+vehicle.populateStationCollection(db);
 
 // The array containing all the vehicle ids  which also serve as express.io room identifiers
 // var vehicleRoomIds = [ 	"220",
@@ -152,11 +163,13 @@ app.io.route('getStations', vehicle.getStations(app, db, vehicle));
 
 // Broadcast the vehicles location to the registered users
 // TODO: instead of periodically sending the information, send it on database update events
-// setInterval(vehicle.broadcastVehiclesLocation(app, db, vehicleRoomIds), 10000);
+// if(development){
+// 	setInterval(vehicle.broadcastVehiclesLocation(app, db, vehicleRoomIds), 1000);
+// }
 
 // Update database with random vehicles location - Simulate vehicle movement when in Development MODE
 // if(development){
-// 	setInterval(vehicle.dummyUpdateVehiclesLocation(app, db, vehicleRoomIds), 10000);
+// 	setInterval(vehicle.dummyUpdateVehiclesLocation(app, db, vehicleRoomIds), 1000);
 // }
 
 //################ START SERVER ################

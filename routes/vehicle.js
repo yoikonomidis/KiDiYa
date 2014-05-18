@@ -124,7 +124,6 @@ exports.updateVehicleLocation = function(app, db, vehicle){
 				res.send("There was a problem adding the information to the database.");
 			}
 			else{
-				// next(); // This is for the rest API
 				app.io.route(vehicle.broadcastVehiclesLocation(app, db, req)); // This is for the Socket API
 			}
 		}); 
@@ -167,6 +166,27 @@ exports.broadcastVehiclesLocation = function(app, db, req){
 	// }
 }
 
+//Periodically broadcast vehicles' location
+// exports.broadcastVehiclesLocation = function(app, db, vehicleRoomIds){
+// 	return function(req){
+// 		console.logger("Broadcast vehicles location...");
+
+// 		for (var i = vehicleRoomIds.length; i > 0; i--) {
+// 			Vehicle.find({name:parseInt(vehicleRoomIds[i])},{id:1, name:1, location:1}, function(err,result){
+// 				if(err){
+// 					//if it failed, return error
+// 					console.logger(err);
+// 					// res.send("There was a problem getting the data from the database.");
+// 				}
+// 				else{
+// 					// console.logger(result);
+// 					app.io.room(parseInt(vehicleRoomIds[i])).broadcast('vehicleInfo', result);	
+// 				}
+// 			});
+// 		}
+// 	}
+// }
+
 // TODO: Remove duplicate - merge with Socket-based
 // Broadcast the received updated location of a vehicle to the registered users - REST
 exports.broadcastVehiclesLocationREST = function(app, db){
@@ -192,7 +212,7 @@ exports.broadcastVehiclesLocationREST = function(app, db){
 exports.getStations = function(app, db){
 	return function(req){
 		console.logger("Sending stations")
-		Station.find({},{},function(err,result){
+		Station.find({},{properties:1, geometry:1 },function(err,result){
 			if(err){
 				//if it failed, return error
 				console.logger(err);
@@ -205,7 +225,7 @@ exports.getStations = function(app, db){
 }
 
 //Periodically broadcast vehicles' location
-// exports.broadcastVehiclesLocation = function(app, db, vehicleRoomIds){
+// exports.broadcastVehiclesLocationREST = function(app, db, vehicleRoomIds){
 // 	return function(){
 // 		console.logger("Broadcast vehicles location...");
 
@@ -225,13 +245,23 @@ exports.getStations = function(app, db){
 // 	}
 // }
 
+// Deregister a user from a room - stop sending him vehicles' location
+exports.deregisterVehiclesLocation = function(app, db, vehicle){
+	return function(req){
+		console.logger(req.data.vehicles);
+		for (var i = req.data.vehicles.length - 1; i >= 0; i--) {
+			req.io.leave(req.data.vehicles[i]);			
+		};
+	}
+}
+
 // Register a user to the appropriate rooms so as to send vehicles' location
 exports.getVehicleLocation = function(app, db, vehicle){
 	return function(req){
-		// console.logger(req.data);
-		for (var i = req.data.length - 1; i >= 0; i--) {
-			req.io.join(req.data[i]);
-			app.io.route(vehicle.initializeVehiclesLocation(app, db, req.data[i]));
+		console.logger(req.data.vehicles);
+		for (var i = req.data.vehicles.length - 1; i >= 0; i--) {
+			req.io.join(req.data.vehicles[i]);
+			app.io.route(vehicle.initializeVehiclesLocation(app, db, req.data.vehicles[i]));
 		};
 	}
 }
@@ -338,5 +368,33 @@ exports.populateVehicleCollection = function(db){
 			}
 		});
 	}
+}
+
+//This function cleans the Station collection and repopulates it with 60 stations.
+exports.populateStationCollection = function(db){
+	// return function(req,res,next){
+		(new Station).cleanAll(function(err){
+			if(err){
+				//if it failed, return error
+				console.log("Error");
+				res.send("There was a problem updating the information to the database.");
+			}
+			else{
+				for(var i=0;i<60;i++){					
+					var mockStation = new Station({properties:{id:i, name:i}, geometry:{coordinates:[((Math.random() * (39.120 - 35.0200) + 35.0200).toFixed(5)), ((Math.random() * (21.120 - 24.0200) + 24.0200).toFixed(5))]}}).save(function(err){
+						if(err){
+						//if it failed, return error
+							console.log("Error");
+							res.send("There was a problem adding the information to the database.");
+						}
+						else{
+							// console.log('Done');
+						}
+					});
+					
+		 		}
+			}
+		});
+	// }
 }
 
