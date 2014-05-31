@@ -118,7 +118,7 @@ exports.reserveVehicle = function(db){
 // Updates a vehicle's location in the database
 exports.updateVehicleLocation = function(app, db, vehicle){
 	return function(req){
-		Vehicle.update({id:req.data.id}, {$set:{location:req.data.location}}, function(err){
+		Vehicle.update({id:req.data.id}, {$set:{name:req.data.name}, $set:{location:req.data.location}}, {upsert: true}, function(err){
 			if(err){
 				//if it failed, return error
 				res.send("There was a problem adding the information to the database.");
@@ -134,7 +134,7 @@ exports.updateVehicleLocation = function(app, db, vehicle){
 // Updates a vehicle's location in the database - REST
 exports.updateVehicleLocationREST = function(app, db, vehicle){
 	return function(req, res, next){
-		Vehicle.update({id:req.body.id}, {$set:{location:req.body.location}}, function(err){
+		Vehicle.update({id:req.body.id}, {$set:{location:req.body.location}}, {upsert: true}, function(err){
 			if(err){
 				//if it failed, return error
 				res.send("There was a problem adding the information to the database.");
