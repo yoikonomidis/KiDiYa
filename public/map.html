@@ -35,7 +35,7 @@
 			function initialize() {
 				geocoder = new google.maps.Geocoder();
 			  	var mapOptions = {
-			    	zoom: 15,
+			    	zoom: 8,
 					mapTypeId: 'roadmap'
 				};
 			  	map = new google.maps.Map(document.getElementById('map-canvas'),mapOptions);
@@ -77,15 +77,16 @@
      	<script>
      		io = io.connect();
      		var stationInfo = new google.maps.InfoWindow();
+     		var vehicleInfo = new google.maps.InfoWindow();
 
-     		// TODO: Get the vehicle identification from a GUI
-     		var arrayVehicles = [220, 222, 235];
+     		// TODO: Get the vehicle identification from a GUI     		
+     		var vehicles = {vehicles : ["220", "230", "235"]};
      		var marker;
      		var busHashMap = {};
      		// Initialize the bus marker's hashMap
-     		for (var i = 0; i < arrayVehicles.length; i++) {
+     		for (var i = 0; i < vehicles.vehicles.length; i++) {
      			if(!(i.toString in busHashMap))
-     				busHashMap[arrayVehicles[i].toString()] = {};
+     				busHashMap[vehicles.vehicles[i].toString()] = {};
      		};
 
      		// Emit ready event to get stations
@@ -93,8 +94,8 @@
 			io.on('stationInfo', StationEvtHandler.bind(null));
 			function StationEvtHandler(data){
 				for(var i=0; i<data.length; i++){
-					lng = data[i].geometry.coordinates[0];
-					lat = data[i].geometry.coordinates[1];
+					lat = data[i].geometry.coordinates[0];
+					lng = data[i].geometry.coordinates[1];					
     				latlng = new google.maps.LatLng(lat, lng);
 					marker = new google.maps.Marker({
 				    	position: latlng,
@@ -111,22 +112,16 @@
 					iconFile = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'; 
 					marker.setIcon(iconFile)
 				}
-			}
-			function listenMarker (marker){
-    			// Listener is put on a different function to create a "closure" around the marker.
-			    google.maps.event.addListener(marker, 'click', function() {
-                    stationInfo.open(map, marker);
-                });
-			}
+			}			
 
 			// Emit ready event with room name.
-			io.emit('getVehicleLocation', arrayVehicles);
+			io.emit('getVehicleLocation', vehicles);
 			// Listen for the location update event.
 			io.on('vehicleInfo', myEvtHandler.bind(null, io, busHashMap));
 
 			// This function is used so as to pass parameters in the listener's callback
 			function myEvtHandler(io, busHashMap, data){
-				console.log(data);
+				console.log(JSON.stringify(data));
 				for(var i=0; i<data.length; i++){
     				lat = data[i].location.latitude;
     				lng = data[i].location.longitude;
@@ -148,8 +143,28 @@
     					position: latlng,
 						map: map
 					});
+
+					marker = busHashMap[indexName][indexId];
+
+					google.maps.event.addListener(marker, 'click', (function(marker, i) {
+        				return function() {
+        					vehicleInfo.setContent(data[i].name);
+        					vehicleInfo.open(map, marker);
+        				}
+      				})(marker, i));
 				}
 			};
+
+			function listenMarker (marker){
+    			// Listener is put on a different function to create a "closure" around the marker.
+
+    			google.maps.event.addListener(marker, 'click', function() {
+                    vehicleInfo.open(map, marker);
+                });
+			    google.maps.event.addListener(marker, 'click', function() {
+                    stationInfo.open(map, marker);
+                });                
+			}
      	</script>
 
 		<style>
