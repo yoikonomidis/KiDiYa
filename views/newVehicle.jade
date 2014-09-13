@@ -1,9 +1,0 @@
-extends layout
-
-block content
-	h1= title
-	form#formAddVehicle(name="addVehicle",method="post",action="addVehicle")
-		input#inputName(type="text", placeholder="name",name="name")
-		input#inputSurName(type="text", placeholder="surname",name="surname")
-		input#inputLocation(type="text", placeholder="location",name="location")
-		button#btnSubmit(type="submit") submit

@@ -12,9 +12,7 @@ var http = require('http');
 var path = require('path');
 var mongoose = require('mongoose');
 var routes = require('./routes');
-var user = require('./routes/user.js');
 var vehicle = require('./routes/vehicle.js');
-var vupair = require('./routes/vupair.js');
 var utils = require('./routes/utils.js');
 var fs = require('fs');
 
@@ -116,27 +114,10 @@ app.use(function(err, req, res, next){
 
 // Order matters! Nodejs will match the incoming request to the first
 //################ REST API ################
-app.post('/userLogin', user.userLogin(db), routes.index);
-app.get('/userLogout', user.userLogout(db), routes.index);
-app.get('/', user.checkAuthUser(db, development), routes.index);
-app.get('/map',user.checkAuthUser(db, development), utils.map(fs));
-app.get('/userList',  user.checkAuthUser(db, development), user.userList(db));
-app.get('/userListMobile',  user.checkAuthUser(db, development), user.userListMobile(db));
-app.post('/addUser', user.addUser(db), user.userList(db));
-app.post('/removeUser', user.removeUser(db),user.userList(db));
-app.get('/vehicleList',  user.checkAuthUser(db, development), vehicle.vehicleList(db));
-app.get('/vehicleListMobile',  user.checkAuthUser(db, development), vehicle.vehicleListMobile(db));
-app.post('/addVehicle', vehicle.addVehicle(db), vehicle.vehicleList(db));
-app.post('/updateVehicleInfo', vehicle.updateVehicleInfo(db));
-app.post('/removeVehicle', vehicle.removeVehicle(db), vehicle.vehicleList(db));
-app.post('/reserveVehicle', vehicle.reserveVehicle(db), vehicle.vehicleList(db));
-app.get('/vuPairList',  user.checkAuthUser(db, development), vupair.vuPairList(db));
-app.get('/vuPairListMobile',  user.checkAuthUser(db, development), vupair.vuPairListMobile(db));
-app.post('/addVUPair', vupair.addVUPair(db));
-app.post('/removeVUPair', vupair.removeVUPair(db));
-app.post('/updateUserLocation', user.updateUserLocation(db), user.userListMobile(db));
-app.get('/populateVehicleCollection', vehicle.populateVehicleCollection(db),routes.index);
-app.post('/updateVehicleLocation', vehicle.updateVehicleLocationREST(app, db, vehicle), vehicle.broadcastVehiclesLocationREST(app, db));
+app.get('/', routes.index);
+app.get('/map', utils.map(fs));
+app.get('/populateVehicleCollection', vehicle.populateVehicleCollection(db), routes.index);
+app.get('/populateStationCollection', vehicle.populateStationCollection(db), routes.index);
 
 //################ SOCKET API ################
 app.io.route('updateVehicleLocation', vehicle.updateVehicleLocation(app, db, vehicle));
@@ -149,10 +130,6 @@ app.io.route('getStations', vehicle.getStations(app, db, vehicle));
 app.io.route('updateAccelerometer', function(){
 	console.logger("Accelerometer");
 });
-
-// For development purposes only
-// Populate stations
-vehicle.populateStationCollection(db);
 
 // The array containing all the vehicle ids  which also serve as express.io room identifiers
 // var vehicleRoomIds = [ 	"220",

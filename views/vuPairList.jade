@@ -1,9 +1,0 @@
-extends layout
-
-block content
-	h1.
-		VUPair List
-	ul
-		each vuPair, i in vuPairList
-			li
-				a(href="mailto:#{vuPair.email}")= vuPair.vuPair.idVehicle
